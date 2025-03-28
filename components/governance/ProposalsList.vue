@@ -59,8 +59,13 @@ export default {
     }
   },
   computed: {
-    ...mapState('governance/gov', ['lockedBalance', 'proposals']),
-    ...mapGetters('governance/gov', ['isFetchingProposals', 'constants', 'isFetchingBalances']),
+    ...mapState('governance/gov', ['proposals']),
+    ...mapGetters('governance/gov', [
+      'isFetchingProposals',
+      'constants',
+      'isFetchingBalances',
+      'votingPower'
+    ]),
     ...mapGetters('token', ['toDecimals']),
     filteredProposals() {
       return this.proposals
@@ -74,7 +79,7 @@ export default {
     },
     hasProposalThreshold() {
       const PROPOSAL_THRESHOLD = toBN(this.constants.PROPOSAL_THRESHOLD)
-      return toBN(this.lockedBalance).gte(PROPOSAL_THRESHOLD)
+      return toBN(this.votingPower).gte(PROPOSAL_THRESHOLD)
     },
     proposalThreshold() {
       return this.toDecimals(this.constants.PROPOSAL_THRESHOLD, 18)

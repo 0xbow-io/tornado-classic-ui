@@ -1,43 +1,28 @@
 import fs from 'fs'
-import Jszip from 'jszip'
+import zlib from 'zlib'
 import Web3 from 'web3'
-import networkConfig from '../../networkConfig'
 
-const jszip = new Jszip()
+import networkConfig, { blockSyncInterval } from '../../networkConfig'
 
-export async function download({ name, directory, contentType }) {
-  const path = `${directory}${name}.zip`.toLowerCase()
+export function download({ name, directory }) {
+  const path = `${directory}${name}.gz`.toLowerCase()
 
-  const data = fs.readFileSync(path)
-  const zip = await jszip.loadAsync(data)
-
-  const file = zip.file(
-    path
-      .replace(directory, '')
-      .slice(0, -4)
-      .toLowerCase()
-  )
-
-  const content = await file.async(contentType)
+  const data = fs.readFileSync(path, { flag: 'as+' })
+  const content = zlib.inflateSync(data)
 
   return content
 }
 
-export async function loadCachedEvents({ name, directory, deployedBlock }) {
+export function loadCachedEvents({ name, directory, deployedBlock }) {
   try {
-    const module = await download({ contentType: 'string', directory, name })
+    const module = download({ contentType: 'string', directory, name })
 
     if (module) {
       const events = JSON.parse(module)
 
-      const [lastEvent] = JSON.parse(module).sort(
-        (a, b) => (b.block || b.blockNumber) - (a.block || a.blockNumber)
-      )
-      const lastBlock = lastEvent.block || lastEvent.blockNumber
-
       return {
         events,
-        lastBlock
+        lastBlock: events[events.length - 1].blockNumber
       }
     }
   } catch (err) {
@@ -54,18 +39,17 @@ export async function getPastEvents({ type, fromBlock, netId, events, contractAt
 
   let [{ url: rpcUrl }] = Object.values(networkConfig[`netId${netId}`].rpcUrls)
 
-  if (netId === '5') {
-    rpcUrl = `https://goerli.infura.io/v3/${process.env.INFURA_KEY}`
-  }
-
   const provider = new Web3.providers.HttpProvider(rpcUrl)
   const web3 = new Web3(provider)
   const contract = new web3.eth.Contract(...contractAttrs)
 
   const currentBlockNumber = await web3.eth.getBlockNumber()
-  const blockDifference = Math.ceil(currentBlockNumber - fromBlock)
+  // PoS networks index blocks too fast, so a buffer is needed
+  const blockNumberBuffer = currentBlockNumber - 3
+  const blockDifference = Math.ceil(blockNumberBuffer - fromBlock)
 
-  const blockRange = Number(netId) === 56 ? 4950 : blockDifference / 20
+  // eth_logs and eth_filter are restricted > 10,000 block queries
+  const blockRange = blockSyncInterval ? blockSyncInterval : 10_000
 
   let chunksCount = blockDifference === 0 ? 1 : Math.ceil(blockDifference / blockRange)
   const chunkSize = Math.ceil(blockDifference / chunksCount)
@@ -79,6 +63,7 @@ export async function getPastEvents({ type, fromBlock, netId, events, contractAt
     }
 
     console.log(`Fetching ${type}, chainId - ${netId}`, `chunksCount - ${chunksCount}`)
+
     for (let i = 0; i < chunksCount; i++)
       try {
         await new Promise((resolve) => setTimeout(resolve, 200))
@@ -97,7 +82,6 @@ export async function getPastEvents({ type, fromBlock, netId, events, contractAt
         toBlock += chunkSize
       } catch (err) {
         console.log('getPastEvents events', `chunk number - ${i}, has error: ${err.message}`)
-        chunksCount = chunksCount + 1
       }
   }
   return downloadedEvents

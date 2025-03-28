@@ -1,7 +1,7 @@
 {
   "closeNotification": "Fermer notification",
-  "indexNotification": "Tornado.cash {link}. Cependant, il s'agit d'un logiciel en phase d'expérimentation. Veuillez l'utiliser à vos propres risques.",
-  "indexNotificationLinkText": "a été audité",
+  "indexNotification": "Tornado Cash est maintenant maintenu par la communauté, pour plus d'informations, visitez {link}",
+  "indexNotificationLinkText": "tornadocash.social",
   "binanceInternalTxsNotification": "Veuillez ne pas utiliser votre adresse de portefeuille Binance pour retirer vos fonds. Les transactions internes (tout comme celles effectuées par Tornado.Cash) ne sont pas supportées sur la plateforme d'échange Binance. Si vous n'avez pas reçu vos fonds sur Binance, veuillez prendre contact avec le support Binance.",
   "deposit": "Déposer",
   "depositButton": "Déposer",
@@ -151,7 +151,7 @@
   "nullifierHash": "Hash Nullifié",
   "verified": "Verifié",
   "generatePdfReport": "Générer un rapport PDF",
-  "compliancePrintWarning": "Ce rapport de conformité est uniquement destiné à des fins d'information. Vous devez confirmer la validité de ce rapport en utilisant l'outil de conformité de Tornado (https://tornadocash.eth.link/compliance) ou tout autre logiciel cryptographique capable de calculer et de vérifier les informations contenues dans ce document (l' \"Outil de Conformité Tornado\"). Toute divergence entre les informations trouvées dans ce rapport et celles fournies par l'outil susmentionné indique que les informations contenues dans ce rapport sont inexactes et/ou frauduleuses.{newline}LE RAPPORT DE CONFORMITÉ EST FOURNI \"EN L'ÉTAT\", SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU IMPLICITE, Y COMPRIS, MAIS SANS S'Y LIMITER, LES GARANTIES DE QUALITÉ MARCHANDE, D'ADÉQUATION À UN USAGE PARTICULIER ET D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS, LES AUTEURS DE L'OUTIL DE CONFORMITÉ TORNADO.CASH NE POURRONT ÊTRE TENUS RESPONSABLES DE TOUTE RÉCLAMATION, DE TOUT DOMMAGE OU DE TOUTE AUTRE RESPONSABILITÉ, QUE CE SOIT DANS LE CADRE D'UNE ACTION CONTRACTUELLE, DÉLICTUELLE OU AUTRE, DÉCOULANT DE, EN DEHORS DE OU EN RELATION AVEC CE RAPPORT DE CONFORMITÉ.",
+  "compliancePrintWarning": "Ce rapport de conformité est uniquement destiné à des fins d'information. Vous devez confirmer la validité de ce rapport en utilisant l'outil de conformité de Tornado (https://tornado.ws/compliance) ou tout autre logiciel cryptographique capable de calculer et de vérifier les informations contenues dans ce document (l' \"Outil de Conformité Tornado\"). Toute divergence entre les informations trouvées dans ce rapport et celles fournies par l'outil susmentionné indique que les informations contenues dans ce rapport sont inexactes et/ou frauduleuses.{newline}LE RAPPORT DE CONFORMITÉ EST FOURNI \"EN L'ÉTAT\", SANS GARANTIE D'AUCUNE SORTE, EXPRESSE OU IMPLICITE, Y COMPRIS, MAIS SANS S'Y LIMITER, LES GARANTIES DE QUALITÉ MARCHANDE, D'ADÉQUATION À UN USAGE PARTICULIER ET D'ABSENCE DE CONTREFAÇON. EN AUCUN CAS, LES AUTEURS DE L'OUTIL DE CONFORMITÉ TORNADO.CASH NE POURRONT ÊTRE TENUS RESPONSABLES DE TOUTE RÉCLAMATION, DE TOUT DOMMAGE OU DE TOUTE AUTRE RESPONSABILITÉ, QUE CE SOIT DANS LE CADRE D'UNE ACTION CONTRACTUELLE, DÉLICTUELLE OU AUTRE, DÉCOULANT DE, EN DEHORS DE OU EN RELATION AVEC CE RAPPORT DE CONFORMITÉ.",
   "relayRequestFailed": "Le relais {relayerName} est en panne. Veuillez choisir un autre relais.",
   "selectProvider": "Sélectionner le fournisseur",
   "walletDoesNotSupported": "Le portefeuille n'est pas supporté",

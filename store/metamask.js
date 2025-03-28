@@ -7,8 +7,6 @@ import { PROVIDERS } from '@/constants'
 import networkConfig from '@/networkConfig'
 import { walletConnectConnector } from '@/services'
 
-import SanctionsListAbi from '@/abis/SanctionsList.abi'
-
 const { toChecksumAddress } = require('web3-utils')
 
 const state = () => {
@@ -155,7 +153,7 @@ const actions = {
   ) {
     try {
       const { ethAccount, netId } = state
-      const gasParams = rootGetters['gasPrices/getGasParams']
+      const gasParams = rootGetters['fees/getGasPriceParams']
 
       const callParams = {
         method,
@@ -330,20 +328,6 @@ const actions = {
       console.error('networkChangeHandler', err.message)
     }
   },
-  async checkIsSanctioned({ rootGetters }, { address }) {
-    const ethProvider = rootGetters['relayer/ethProvider']
-    const contract = new ethProvider.eth.Contract(
-      SanctionsListAbi,
-      '0x40C57923924B5c5c5455c48D93317139ADDaC8fb'
-    )
-
-    const isSanctioned = await contract.methods.isSanctioned(address).call()
-
-    if (isSanctioned) {
-      window.onbeforeunload = null
-      window.location = 'https://twitter.com/TornadoCash/status/1514904975037669386'
-    }
-  },
   async onNetworkChanged({ state, getters, commit, dispatch }, { netId }) {
     dispatch('checkMismatchNetwork', netId)
 
@@ -423,8 +407,6 @@ const actions = {
       if (!address) {
         throw new Error('lockedMetamask')
       }
-
-      await dispatch('checkIsSanctioned', { address })
 
       commit('IDENTIFY', address)
 
@@ -528,7 +510,7 @@ const actions = {
       56: {
         chainId: '0x38',
         chainName: 'Binance Smart Chain Mainnet',
-        rpcUrls: ['https://bsc-dataseed1.ninicoin.io'],
+        rpcUrls: ['https://bscrpc.com'],
         nativeCurrency: {
           name: 'Binance Chain Native Token',
           symbol: 'BNB',
@@ -550,7 +532,7 @@ const actions = {
       100: {
         chainId: '0x64',
         chainName: 'Gnosis',
-        rpcUrls: ['https://rpc.gnosischain.com'],
+        rpcUrls: ['https://development.tornadocash.community/rpc/v1'],
         nativeCurrency: {
           name: 'xDAI',
           symbol: 'xDAI',
@@ -561,7 +543,7 @@ const actions = {
       137: {
         chainId: '0x89',
         chainName: 'Polygon Mainnet',
-        rpcUrls: ['https://rpc-mainnet.maticvigil.com'],
+        rpcUrls: ['https://polygon-rpc.com'],
         nativeCurrency: {
           name: 'MATIC',
           symbol: 'MATIC',

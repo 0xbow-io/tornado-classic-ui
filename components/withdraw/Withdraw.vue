@@ -51,8 +51,7 @@
         data-test="enter_note_field"
       ></b-input>
       <div v-if="hasErrorNote" class="help" :class="hasErrorNote.type">
-        <!-- eslint-disable vue/no-v-html -->
-        <p v-html="hasErrorNote.msg"></p>
+        <p>{{ hasErrorNote.msg }}</p>
       </div>
     </div>
     <div v-if="!hasErrorNote && depositTxHash" class="field field-withdraw">
@@ -189,7 +188,7 @@ export default {
     ...mapState('relayer', ['isLoadingRelayers']),
     ...mapGetters('txHashKeeper', ['txExplorerUrl']),
     ...mapGetters('application', ['isNotEnoughTokens', 'selectedStatisticCurrency']),
-    ...mapGetters('metamask', ['networkConfig', 'netId', 'isLoggedIn', 'nativeCurrency']),
+    ...mapGetters('metamask', ['networkConfig', 'netId', 'isLoggedIn']),
     notEnoughDeposits() {
       if (this.depositsPast < 5) {
         return true
@@ -197,7 +196,7 @@ export default {
       return false
     },
     shouldSettingsShow() {
-      return !this.hasErrorNote && !this.error.message
+      return !this.isLoading && !this.error.type && !this.hasErrorNote
     },
     hasErrorNote() {
       const note = this.withdrawNote.split('-')[4]
@@ -334,9 +333,8 @@ export default {
               })
             }
             this.$store.dispatch('application/setAndUpdateStatistic', { currency, amount: Number(amount) })
-            if (currency !== this.nativeCurrency) {
-              this.$store.dispatch('application/setDefaultEthToReceive', { currency })
-            }
+            this.$store.dispatch('fees/calculateWithdrawalFeeViaRelayer', {})
+            this.$store.dispatch('loading/updateProgress', { progress: -1 })
             this.depositsPast = Number(depositsPast) <= 0 ? 0 : depositsPast
             this.depositTxHash = txHash
             this.depositTimestamp = timestamp

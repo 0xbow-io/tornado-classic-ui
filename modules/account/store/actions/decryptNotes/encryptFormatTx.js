@@ -25,7 +25,7 @@ export async function _encryptFormatTx({ dispatch, getters, rootGetters }, { eve
     if (!instance) {
       return acc
     }
-    const name = `${instance.amount}${instance.currency}`
+    const name = `${netId}${instance.amount}${instance.currency}`
     if (!acc[name]) {
       const service = eventsInterface.getService({ netId, ...instance })
       acc[name] = { ...instance, service }
@@ -49,7 +49,7 @@ export async function _encryptFormatTx({ dispatch, getters, rootGetters }, { eve
         if (!instance) {
           return
         }
-        const { service } = instances[`${instance.amount}${instance.currency}`]
+        const { service } = instances[`${netId}${instance.amount}${instance.currency}`]
         return getDeposit({ event, netId, service, instance })
       })
 
@@ -71,6 +71,8 @@ export async function _encryptFormatTx({ dispatch, getters, rootGetters }, { eve
       console.error('_encryptFormatTx', e)
     }
   }
+
+  dispatch('loading/disable', {}, { root: true })
 
   return formattingEvents(result)
 }

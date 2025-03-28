@@ -1,17 +1,20 @@
 import fs from 'fs'
-import zipper from 'zip-local'
+import zlib from 'zlib'
 
-export function save(fileName) {
+export function save(filePath) {
   try {
-    zipper.sync
-      .zip(`${fileName}`)
-      .compress()
-      .save(`${fileName}.zip`)
+    const data = fs.readFileSync(`${filePath}`)
 
-    fs.unlinkSync(fileName)
+    const payload = zlib.deflateSync(data, {
+      level: zlib.constants.Z_BEST_COMPRESSION,
+      strategy: zlib.constants.Z_FILTERED
+    })
+
+    fs.writeFileSync(`${filePath}.gz`, payload)
+
     return true
   } catch (err) {
-    console.log('on save error', fileName, err.message)
+    console.log('on save error', filePath, err.message)
     return false
   }
 }

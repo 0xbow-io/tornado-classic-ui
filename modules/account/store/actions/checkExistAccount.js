@@ -21,7 +21,7 @@ export async function checkExistAccount({ getters, dispatch, rootState, rootGett
 
     const isExist = Boolean(Array.isArray(events) && Boolean(events.length))
 
-    console.log('isExist', isExist)
+    console.log('Is encrypted note events exist: ', isExist)
 
     dispatch('createMutation', {
       type: 'CHECK_ACCOUNT',

@@ -24,7 +24,7 @@
     >
       <i18n path="trustBanner.trustLess">
         <template v-slot:link>
-          <a href="https://tornado.cash/">{{ $t('trustBanner.link') }}</a>
+          <a href="https://tornado.ws/">{{ $t('trustBanner.link') }}</a>
         </template>
       </i18n>
     </b-notification>
@@ -40,37 +40,45 @@
     >
       <i18n path="indexNotification">
         <template v-slot:link>
-          <a
-            href="https://twitter.com/TornadoCash/status/1204745639759884289"
-            target="_blank"
-            rel="noopener noreferrer"
-            >{{ $t('indexNotificationLinkText') }}</a
-          >
+          <a href="https://tornadocash.social" target="_blank" rel="noopener noreferrer">
+            {{ $t('indexNotificationLinkText') }}
+          </a>
         </template>
       </i18n>
     </b-notification>
 
     <b-notification
-      v-if="isEthLink"
-      :active="isActiveNotification.ethLink"
+      :active="isActiveNotification.second"
       class="main-notification"
       type="is-warning"
       icon-pack="icon"
       has-icon
       :aria-close-label="$t('closeNotification')"
-      @close="disableNotification({ key: 'ethLink' })"
+      @close="disableNotification({ key: 'second' })"
     >
-      <i18n path="ethLinkBanner.notification">
-        <template v-slot:issue>
+      <i18n path="rpcDisclaimer">
+        <template v-slot:linkOne>
           <a
-            href="https://discuss.ens.domains/t/eth-link-expiry/13899"
+            href="https://home.treasury.gov/news/press-releases/jy0916"
             target="_blank"
             rel="noopener noreferrer"
-            >{{ $t('ethLinkBanner.issue') }}</a
           >
+            {{ $t('rpcDisclaimerLinkOneText') }}
+          </a>
         </template>
-        <template v-slot:alternative>
-          <a href="https://tornado.cash/">{{ $t('ethLinkBanner.alternative') }}</a>
+        <template v-slot:linkTwo>
+          <a href="https://chainlist.org" target="_blank" rel="noopener noreferrer">
+            {{ $t('rpcDisclaimerLinkTwoText') }}
+          </a>
+        </template>
+        <template v-slot:linkThree>
+          <a
+            href="https://docs.tornado.ws/general/guides/post-censorship#RPC"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ $t('rpcDisclaimerLinkThreeText') }}
+          </a>
         </template>
       </i18n>
     </b-notification>
@@ -107,8 +115,7 @@ export default {
   data() {
     return {
       activeTab: 0,
-      isActive: false,
-      isEthLink: window.location.host === 'tornadocash.eth.link'
+      isActive: false
     }
   },
   computed: {
@@ -151,8 +158,19 @@ export default {
           }
         }
       } else {
-        const { currency, amount } = this.selectedInstance
-        this.$store.dispatch('application/setAndUpdateStatistic', { currency, amount })
+        const userSelection = this.selectedInstance
+        const stateSelection = this.selectedStatistic
+
+        if (
+          !stateSelection ||
+          userSelection.amount !== stateSelection.amount ||
+          userSelection.currency !== stateSelection.currency
+        ) {
+          this.$store.dispatch('application/setAndUpdateStatistic', {
+            currency: userSelection.currency,
+            amount: userSelection.amount
+          })
+        }
       }
     }
   }

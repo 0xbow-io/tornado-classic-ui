@@ -20,7 +20,7 @@
         {{ $t('compliance') }}
       </b-navbar-item>
       <b-navbar-item
-        href="https://docs.tornado.cash"
+        href="https://docs.tornado.ws"
         target="_blank"
         data-test="docs_link"
         rel="noopener noreferrer"

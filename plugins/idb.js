@@ -262,26 +262,26 @@ export default async (ctx, inject) => {
 
     Object.keys(tokens).forEach((token) => {
       Object.keys(tokens[token].instanceAddress).forEach((amount) => {
-        if (nativeCurrency === token && netId === 1) {
+        if (nativeCurrency === token) {
           stores.push({
-            name: `stringify_bloom_${token}_${amount}`,
+            name: `stringify_bloom_${netId}_${token}_${amount}`,
             keyPath: 'hashBloom'
           })
         }
 
         stores.push(
           {
-            name: `deposits_${token}_${amount}`,
+            name: `deposits_${netId}_${token}_${amount}`,
             keyPath: 'leafIndex', // the key by which it refers to the object must be in all instances of the storage
             indexes: DEPOSIT_INDEXES
           },
           {
-            name: `withdrawals_${token}_${amount}`,
-            keyPath: 'transactionHash',
+            name: `withdrawals_${netId}_${token}_${amount}`,
+            keyPath: 'blockNumber',
             indexes: WITHDRAWAL_INDEXES
           },
           {
-            name: `stringify_tree_${token}_${amount}`,
+            name: `stringify_tree_${netId}_${token}_${amount}`,
             keyPath: 'hashTree'
           }
         )

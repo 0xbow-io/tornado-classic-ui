@@ -3,6 +3,7 @@ import Web3 from 'web3'
 import BN from 'bignumber.js'
 import namehash from 'eth-ens-namehash'
 
+import { httpConfig } from '@/constants'
 import { schema, relayerRegisterService } from '@/services'
 import { createChainIdState, parseNote, parseSemanticVersion } from '@/utils'
 
@@ -85,8 +86,9 @@ export const state = () => {
 export const getters = {
   ethProvider: (state, getters, rootState) => {
     const { url } = rootState.settings.netId1.rpc
+    const httpProvider = new Web3.providers.HttpProvider(url, httpConfig)
 
-    return new Web3(url)
+    return new Web3(httpProvider)
   },
   jobs: (state, getters, rootState, rootGetters) => (type) => {
     const netId = rootGetters['metamask/netId']
@@ -204,7 +206,13 @@ export const actions = {
       }
 
       const url = `${window.location.protocol}//${hostname}`
-      const response = await axios.get(`${url}status`, { timeout: 5000 }).catch(() => {
+      const reqConfig = {
+        headers: {
+          'Content-Type': 'application/json, application/x-www-form-urlencoded'
+        },
+        timeout: 10000
+      }
+      const response = await axios.get(`${url}status`, reqConfig).catch(() => {
         throw new Error(this.app.i18n.t('canNotFetchStatusFromTheRelayer'))
       })
 
@@ -232,31 +240,19 @@ export const actions = {
         throw new Error(this.app.i18n.t('canNotFetchStatusFromTheRelayer'))
       }
 
-      const hasEnabledLightProxy = rootGetters['application/hasEnabledLightProxy']
-
-      const getIsUpdated = () => {
+      const isRelayerUpdated = () => {
         const relayerVersion = response.data.version
 
-        if (relayerVersion === '5.0.0') {
-          return true
-        }
-
-        const requiredMajor = hasEnabledLightProxy ? '5' : '4'
         const { major, patch, prerelease } = parseSemanticVersion(relayerVersion)
-
+        // Save backwards compatibility with V4 relayers for Ethereum Mainnet
+        const requiredMajor = netId === 1 ? '4' : '5'
         const isUpdatedMajor = major === requiredMajor
 
-        if (isUpdatedMajor && prerelease) {
-          const minimalBeta = 11
-          const [betaVersion] = prerelease.split('.').slice(-1)
-          return Number(betaVersion) >= minimalBeta
-        }
-
-        const minimalPatch = 4
-        return isUpdatedMajor && Number(patch) >= minimalPatch
+        if (prerelease) return false
+        return isUpdatedMajor && (Number(patch) >= 5 || netId !== 1) // Patch checking - also backwards compatibility for Mainnet
       }
 
-      if (!getIsUpdated()) {
+      if (!isRelayerUpdated()) {
         throw new Error('Outdated version.')
       }
 
@@ -322,8 +318,18 @@ export const actions = {
       })
     } catch {
       console.error('Method pickRandomRelayer has not picked relayer')
+      dispatch(
+        'notice/addNotice',
+        {
+          notice: {
+            untranslatedTitle: 'Failed to fetch relayers',
+            type: 'warning'
+          },
+          interval: 1500
+        },
+        { root: true }
+      )
     }
-
     commit('SET_IS_LOADING_RELAYERS', false)
   },
   async getKnownRelayerData({ rootGetters, getters }, { relayerAddress, name }) {

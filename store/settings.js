@@ -51,11 +51,14 @@ export const actions = {
   },
   async checkCurrentRpc({ dispatch, getters, rootGetters }) {
     const netId = rootGetters['metamask/netId']
+    if (netId !== 1) {
+      await dispatch('preselectRpc', { netId: 1, isEthRpc: true })
+    }
     await dispatch('preselectRpc', { netId })
   },
-  async preselectRpc({ getters, commit, dispatch }, { netId }) {
+  async preselectRpc({ getters, commit, dispatch }, { netId, isEthRpc = false }) {
     const savedRpc = getters.getRpc(netId)
-    const { isValid } = await dispatch('checkRpc', { ...savedRpc, netId })
+    const { isValid } = await dispatch('checkRpc', { ...savedRpc, netId, isEthRpc })
 
     if (isValid) {
       return
@@ -64,7 +67,7 @@ export const actions = {
     const { rpcUrls } = networkConfig[`netId${netId}`]
 
     for (const [, { name, url }] of Object.entries(rpcUrls)) {
-      const { isValid, error } = await dispatch('checkRpc', { url, netId })
+      const { isValid, error } = await dispatch('checkRpc', { url, netId, isEthRpc })
       if (isValid) {
         commit('SAVE_RPC', { netId, name, url })
         return
@@ -74,14 +77,13 @@ export const actions = {
     }
     throw new Error(this.app.i18n.t('rpcSelectError'))
   },
-  async checkRpc(_, { url, netId }) {
+  async checkRpc(_, { url, netId, isEthRpc = false }) {
     try {
       const web3 = new Web3(url)
-
       const chainId = await web3.eth.getChainId()
-
       const isCurrent = Number(chainId) === Number(netId)
-      if (isCurrent) {
+
+      if (isEthRpc || isCurrent) {
         return { isValid: true }
       } else {
         return { isValid: false, error: this.app.i18n.t('thisRpcIsForDifferentNetwork') }

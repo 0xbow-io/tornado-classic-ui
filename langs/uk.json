@@ -1,7 +1,7 @@
 {
   "closeNotification": "Закрити повідомлення",
-  "indexNotification": "Tornado.Cash {link}. Однак, це експериментальний проект, використовуйте на свій страх і ризик.",
-  "indexNotificationLinkText": "пройшов аудит",
+  "indexNotification": "Tornado Cash зараз обслуговується спільнотою, щоб дізнатися більше, відвідайте {link}",
+  "indexNotificationLinkText": "tornadocash.social",
   "binanceInternalTxsNotification": "Будь ласка, не використовуйте адреси гаманців Binance для виведення коштів. Внутрішні транзакції (включаючи зняття коштів з Tornado.cash) в даний час не підтримуються на біржі Binance. Якщо у вас виникли проблеми з отриманням коштів, вам слід звернутися в службу підтримки Binance.",
   "deposit": "Депозит",
   "depositButton": "Внести",

@@ -123,13 +123,13 @@ export const mutations = {
 }
 
 export const actions = {
-  async getInstances({ rootGetters }, { txs }) {
+  async getInstances({ rootGetters, dispatch }, { txs }) {
     const eventsInterface = rootGetters['application/eventsInterface']
 
     const instances = txs.reduce((acc, curr) => {
       const [, currency, amount, netId] = curr.prefix.split('-')
 
-      const name = `${amount}${currency}`
+      const name = `${netId}${amount}${currency}`
       if (!acc[name]) {
         const service = eventsInterface.getService({ netId, amount, currency })
         acc[name] = { currency, amount, netId, service }
@@ -143,6 +143,8 @@ export const actions = {
         Object.values(instances).map((instance) => instance.service.updateEvents(eventsType.WITHDRAWAL))
       )
     )
+
+    dispatch('loading/disable', {}, { root: true })
 
     return instances
   },
@@ -161,7 +163,7 @@ export const actions = {
         txHash: tx.txHash,
         type: eventsType.DEPOSIT,
         commitment: tx.commitmentHex,
-        service: instances[`${amount}${currency}`]
+        service: instances[`${netId}${amount}${currency}`]
       })
     }
   },
@@ -213,7 +215,7 @@ export const actions = {
       if (!tx.isSpent) {
         const { currency, amount, netId, nullifierHex } = parseNote(`${tx.prefix}-${tx.note}`)
 
-        const isSpent = await instances[`${amount}${currency}`].service.findEvent({
+        const isSpent = await instances[`${netId}${amount}${currency}`].service.findEvent({
           eventName: 'nullifierHash',
           eventToFind: nullifierHex,
           type: eventsType.WITHDRAWAL
@@ -224,6 +226,8 @@ export const actions = {
         }
       }
     }
+
+    dispatch('loading/disable', {}, { root: true })
   },
   checkPendingTransaction({ getters, dispatch }) {
     const transactions = getters.txs
@@ -364,7 +368,7 @@ export const actions = {
       if (tx && !tx.isSpent) {
         const { currency, amount, netId, nullifierHex } = parseNote(`${tx.prefix}-${tx.note}`)
 
-        const isSpent = await instances[`${amount}${currency}`].service.findEvent({
+        const isSpent = await instances[`${netId}${amount}${currency}`].service.findEvent({
           eventName: 'nullifierHash',
           eventToFind: nullifierHex,
           type: eventsType.WITHDRAWAL
@@ -375,6 +379,8 @@ export const actions = {
         }
       }
     }
+
+    dispatch('loading/disable', {}, { root: true })
   },
   async updateDeposit(
     { getters, commit, dispatch, rootGetters },

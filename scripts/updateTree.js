@@ -1,11 +1,12 @@
 import 'dotenv/config'
 
 import fs from 'fs'
+
 import BloomFilter from 'bloomfilter.js'
-import { MerkleTree } from 'fixed-merkle-tree'
+import { MerkleTree } from '@tornado/fixed-merkle-tree'
 import { buildMimcSponge } from 'circomlibjs'
 
-import networkConfig from '../networkConfig'
+import networkConfig, { enabledChains } from '../networkConfig'
 
 import { loadCachedEvents, save } from './helpers'
 
@@ -14,7 +15,7 @@ const TREES_PATH = './static/trees/'
 const EVENTS_PATH = './static/events/'
 
 const EVENTS = ['deposit']
-const enabledChains = ['1']
+
 let mimcHash
 
 const trees = {
@@ -22,30 +23,32 @@ const trees = {
   LEVELS: 20 // const from contract
 }
 
-function getName({ path, type, instance, format = '.json', currName = 'eth' }) {
-  return `${path}${type.toLowerCase()}s_${currName}_${instance}${format}`
+function getName({ path, type, netId, instance, format = '.json', currName = 'eth' }) {
+  return `${path}${type.toLowerCase()}s_${netId}_${currName}_${instance}${format}`
 }
 
 function createTreeZip(netId) {
   try {
-    const config = networkConfig[`netId${netId}`]
-    const { instanceAddress: CONTRACTS } = config.tokens.eth
+    const { tokens, nativeCurrency, currencyName } = networkConfig[`netId${netId}`]
+    const CONTRACTS = tokens[nativeCurrency].instanceAddress
 
     for (const type of EVENTS) {
       for (const [instance] of Object.entries(CONTRACTS)) {
         const baseFilename = getName({
           type,
           instance,
+          netId,
           format: '',
           path: TREES_PATH,
-          currName: config.currencyName.toLowerCase()
+          currName: currencyName.toLowerCase()
         })
 
         const treesFolder = fs.readdirSync(TREES_FOLDER)
 
         treesFolder.forEach((fileName) => {
           fileName = `${TREES_PATH}${fileName}`
-          const isInstanceFile = !fileName.includes('.zip') && fileName.includes(baseFilename)
+
+          const isInstanceFile = !fileName.includes('.gz') && fileName.includes(baseFilename)
 
           if (isInstanceFile) {
             save(fileName)
@@ -58,25 +61,25 @@ function createTreeZip(netId) {
 
 async function createTree(netId) {
   try {
-    const { currencyName, tokens, deployedBlock } = networkConfig[`netId${netId}`]
-
-    const currName = currencyName.toLowerCase()
-    const { instanceAddress: CONTRACTS } = tokens.eth
+    const config = networkConfig[`netId${netId}`]
+    const { nativeCurrency, currencyName, deployedBlock } = config
+    const CONTRACTS = config.tokens[nativeCurrency].instanceAddress
 
     for (const type of EVENTS) {
       for (const [instance] of Object.entries(CONTRACTS)) {
         const filePath = getName({
           type,
           instance,
-          currName,
+          netId,
           format: '',
-          path: TREES_PATH
+          path: TREES_PATH,
+          currName: currencyName.toLowerCase()
         })
 
         console.log('createTree', { type, instance })
 
-        const { events } = await loadCachedEvents({
-          name: `${type}s_${currName}_${instance}.json`,
+        const { events } = loadCachedEvents({
+          name: `${type}s_${netId}_${nativeCurrency}_${instance}.json`,
           directory: EVENTS_PATH,
           deployedBlock
         })
@@ -119,10 +122,12 @@ async function createTree(netId) {
           }, [])
 
           const sliceJson = JSON.stringify(slice, null, 2) + '\n'
+
           fs.writeFileSync(`${filePath}_slice${index + 1}.json`, sliceJson)
         })
 
         const bloomCache = bloom.serialize()
+
         fs.writeFileSync(`${filePath}_bloom.json`, bloomCache)
       }
     }
@@ -138,13 +143,16 @@ async function initMimc() {
 
 async function main() {
   const [, , , chain] = process.argv
+
   if (!enabledChains.includes(chain)) {
     throw new Error(`Supported chain ids ${enabledChains.join(', ')}`)
   }
+
   await initMimc()
 
   await createTree(chain)
-  await createTreeZip(chain)
+
+  createTreeZip(chain)
 }
 
 main()

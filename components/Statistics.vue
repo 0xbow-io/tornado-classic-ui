@@ -93,9 +93,7 @@ export default {
     }
   },
   mounted() {
-    if (!this.timer) {
-      this.updateEvents()
-    }
+    this.updateEvents()
   },
   beforeDestroy() {
     clearTimeout(this.timer)
@@ -103,10 +101,6 @@ export default {
   methods: {
     updateEvents() {
       this.$store.dispatch('application/updateSelectEvents')
-
-      this.timer = setTimeout(() => {
-        this.updateEvents()
-      }, 60 * 1000)
     }
   }
 }

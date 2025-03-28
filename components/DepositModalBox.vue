@@ -29,10 +29,8 @@
       {{ $t('saveAsFile') }} <span class="has-text-primary">{{ filename }}</span>
     </div>
     <template v-if="!isSetupAccount">
-      <i18n tag="div" path="yourDontHaveAccount" class="notice">
-        <template v-slot:account>
-          <a @click="_redirectToAccount">{{ $t('account.button') }}</a>
-        </template>
+      <i18n tag="div" path="yourDontHaveAccount" class="notice warning">
+        <template v-slot:account></template>
       </i18n>
     </template>
     <b-checkbox v-if="isSetupAccount" v-model="isEncrypted">

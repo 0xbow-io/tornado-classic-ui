@@ -37,42 +37,10 @@
                 <b-button
                   tag="a"
                   type="is-icon"
-                  href="https://torn.community"
+                  href="https://git.tornado.ws/tornadocash/classic-ui"
                   target="_blank"
                   rel="noopener noreferrer"
-                  icon-right="discourse"
-                ></b-button>
-                <b-button
-                  tag="a"
-                  type="is-icon"
-                  href="https://discord.com/invite/TFDrM8K42j"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon-right="discord"
-                ></b-button>
-                <b-button
-                  tag="a"
-                  type="is-icon"
-                  href="https://tornado-cash.medium.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon-right="medium"
-                ></b-button>
-                <b-button
-                  tag="a"
-                  type="is-icon"
-                  href="https://twitter.com/TornadoCash"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon-right="twitter"
-                ></b-button>
-                <b-button
-                  tag="a"
-                  type="is-icon"
-                  href="https://t.me/TornadoCashOfficial"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  icon-right="telegram"
+                  icon-right="git"
                 ></b-button>
                 <b-button
                   tag="a"

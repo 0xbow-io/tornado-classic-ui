@@ -3,12 +3,12 @@ import 'dotenv/config'
 import fs from 'fs'
 import { uniqBy } from 'lodash'
 
-import networkConfig from '../networkConfig'
+import networkConfig, { enabledChains } from '../networkConfig'
 import ABI from '../abis/TornadoProxy.abi.json'
+
 import { getPastEvents, loadCachedEvents } from './helpers'
 
 const EVENTS_PATH = './static/events/'
-const enabledChains = ['1', '5', '56']
 
 async function saveEncryptedNote(netId) {
   const {
@@ -23,7 +23,7 @@ async function saveEncryptedNote(netId) {
   let encryptedEvents = []
   const name = `encrypted_notes_${netId}.json`
 
-  const cachedEvents = await loadCachedEvents({
+  const cachedEvents = loadCachedEvents({
     name,
     directory: EVENTS_PATH,
     deployedBlock: constants.ENCRYPTED_NOTES_BLOCK
@@ -57,11 +57,13 @@ async function saveEncryptedNote(netId) {
   freshEvents = uniqBy(freshEvents, 'encryptedNote').sort((a, b) => b.blockNumber - a.blockNumber)
 
   const eventsJson = JSON.stringify(freshEvents, null, 2) + '\n'
+
   fs.writeFileSync(`${EVENTS_PATH}${name}`, eventsJson)
 }
 
 async function main() {
   const [, , , chain] = process.argv
+
   if (!enabledChains.includes(chain)) {
     throw new Error(`Supported chain ids ${enabledChains.join(', ')}`)
   }

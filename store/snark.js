@@ -1,16 +1,14 @@
 /* eslint-disable no-console */
-import Web3 from 'web3'
-import Jszip from 'jszip'
+import zlib from 'zlib'
 import axios from 'axios'
-import ENS, { getEnsAddress } from '@ensdomains/ensjs'
+import Web3 from 'web3'
 
 import { detectMob } from '@/utils'
 import networkConfig from '@/networkConfig'
 
 const { APP_ENS_NAME } = process.env
 
-const groth16 = require('websnark/src/groth16')
-const jszip = new Jszip()
+const groth16 = require('@tornado/websnark/src/groth16')
 
 function buildGroth16() {
   const isMobile = detectMob()
@@ -19,31 +17,32 @@ function buildGroth16() {
 }
 
 function getEns() {
-  const provider = new Web3.providers.HttpProvider(networkConfig.netId1.rpcUrls.Infura.url)
-  return new ENS({ provider, ensAddress: getEnsAddress('1') })
+  const { url } = Object.values(networkConfig.netId1.rpcUrls)[0]
+  const provider = new Web3(url)
+
+  return provider.eth.ens
 }
 
 async function getTornadoKeys(getProgress) {
   try {
     const keys = await Promise.all([
-      download({ name: 'tornado.json.zip', contentType: 'string' }),
-      download({ name: 'tornadoProvingKey.bin.zip', contentType: 'arraybuffer', getProgress })
+      download({ name: 'tornado.json.gz', contentType: 'string' }),
+      download({ name: 'tornadoProvingKey.bin.gz', contentType: 'arraybuffer', getProgress })
     ])
-    return { circuit: JSON.parse(keys[0]), provingKey: keys[1] }
+
+    return { circuit: JSON.parse(keys[0]), provingKey: keys[1].buffer }
   } catch (err) {
+    console.log('ERR', err)
     throw err
   }
 }
 
 async function getIPFSIdFromENS(ensName) {
   try {
-    const ens = getEns()
+    const ensInterface = getEns()
+    const { decoded } = await ensInterface.getContenthash(ensName)
 
-    const ensInterface = await ens.name(ensName)
-    const { value } = await ensInterface.getContent(ensName)
-
-    const [, id] = value.split('://')
-    return id
+    return decoded
   } catch (err) {
     throw new Error(err)
   }
@@ -98,11 +97,8 @@ async function download({ name, contentType, getProgress, eventName = 'events' }
     // eslint-disable-next-line no-undef
     const prefix = __webpack_public_path__.slice(0, -7)
     const response = await fetchFile({ getProgress, url: prefix, name })
-
-    const zip = await jszip.loadAsync(response.data)
-    const file = zip.file(name.replace(`${eventName}/`, '').slice(0, -4))
-
-    const content = await file.async(contentType)
+    const buffer = Buffer.from(await response.data.arrayBuffer())
+    const content = zlib.inflateSync(buffer)
 
     return content
   } catch (err) {

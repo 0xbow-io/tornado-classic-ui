@@ -2,11 +2,11 @@
 import Web3 from 'web3'
 import { toBN } from 'web3-utils'
 import tornABI from '../abis/ERC20.abi.json'
+import PermitSigner from '../lib/Permit'
 
 import { isWalletRejection } from '@/utils'
 
 const { toWei, toHex, numberToHex } = require('web3-utils')
-const { PermitSigner } = require('../lib/Permit')
 
 const state = () => {
   return {
@@ -168,11 +168,11 @@ const actions = {
       }
 
       const permitSigner = new PermitSigner(domain, args)
-      const message = permitSigner.getPayload()
+      const req = permitSigner.getReqPayload()
 
       const callParams = {
         method: 'eth_signTypedData_v4',
-        params: [ethAccount, JSON.stringify(message)]
+        params: [ethAccount, JSON.stringify(req)]
       }
 
       dispatch(
@@ -186,18 +186,10 @@ const actions = {
         { root: true }
       )
 
-      let signature = await this.$provider.sendRequest(callParams)
-      signature = signature.substring(2)
-      const r = '0x' + signature.substring(0, 64)
-      const s = '0x' + signature.substring(64, 128)
-      let v = parseInt(signature.substring(128, 130), 16)
+      const query = await this.$provider.sendRequest(callParams)
+      const { v, r, s, hex } = permitSigner.getSignature(query)
 
-      // fix ledger sign
-      if (v === 0 || v === 1) {
-        v = v + 27
-      }
-
-      console.log('signature', v, r, s, signature)
+      console.log('signature', v, r, s, hex)
 
       // signature validation on contract
       await getters.tokenContract.methods

@@ -18,7 +18,9 @@
       </div>
       <div v-if="withdrawType === 'relayer'" class="withdraw-data-item">
         {{ $t('networkFee') }}
-        <span data-test="label_network_fee">{{ toDecimals(networkFee, 18, 6) }} {{ networkCurrency }}</span>
+        <span data-test="label_network_fee"
+          >{{ toDecimals(withdrawalNetworkFee, 18, 6) }} {{ networkCurrency }}</span
+        >
       </div>
       <div v-if="withdrawType === 'relayer'" class="withdraw-data-item">
         {{ $t('relayerFee') }}
@@ -69,13 +71,13 @@ export default {
   },
   computed: {
     ...mapState('application', ['selectedStatistic']),
+    ...mapState('fees', ['withdrawalNetworkFee', 'withdrawalFeeViaRelayer']),
     ...mapGetters('metamask', ['networkConfig', 'nativeCurrency']),
     ...mapGetters('metamask', {
       networkCurrency: 'currency'
     }),
-    ...mapGetters('gasPrices', ['gasPriceInGwei']),
+    ...mapGetters('fees', ['gasPriceInGwei']),
     ...mapGetters('token', ['toDecimals', 'fromDecimals']),
-    ...mapGetters('application', ['networkFee']),
     ...mapGetters('price', ['tokenRate']),
     relayerFee() {
       const { amount } = this.selectedStatistic
@@ -91,7 +93,7 @@ export default {
       const tornadoServiceFee = this.relayerFee
       const { currency } = this.selectedStatistic
       const { decimals } = this.networkConfig.tokens[currency]
-      const ethFee = this.networkFee
+      const ethFee = this.withdrawalNetworkFee
       if (currency === this.nativeCurrency) {
         return ethFee.add(tornadoServiceFee)
       }
@@ -117,17 +119,12 @@ export default {
       return fromWei(this.ethToReceive)
     },
     total() {
-      const { amount, currency } = this.selectedStatistic
+      const { amount } = this.selectedStatistic
       let total = toBN(this.fromDecimals(amount.toString()))
 
       if (this.withdrawType === 'relayer') {
-        const relayerFee = this.totalRelayerFee
-
-        if (currency === this.nativeCurrency) {
-          total = total.sub(relayerFee)
-        } else {
-          total = total.sub(relayerFee).sub(this.ethToReceiveInToken)
-        }
+        const relayerFee = this.withdrawalFeeViaRelayer
+        total = total.sub(relayerFee)
       }
 
       return this.toDecimals(total, null, 6)

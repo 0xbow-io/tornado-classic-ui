@@ -1,12 +1,5 @@
-const {
-  INFURA_KEY,
-  ALCHEMY_MAINNET_KEY,
-  ALCHEMY_POLYGON_KEY,
-  ALCHEMY_OPTIMISM_KEY,
-  ALCHEMY_ARBITRUM_KEY,
-  ALCHEMY_GOERLI_KEY
-} = process.env
-
+export const blockSyncInterval = 10000
+export const enabledChains = ['1', '5', '10', '56', '100', '137', '42161', '43114']
 export default {
   netId1: {
     rpcCallRetryAttempt: 15,
@@ -28,16 +21,21 @@ export default {
     networkName: 'Ethereum Mainnet',
     deployedBlock: 9116966,
     rpcUrls: {
-      Infura: {
-        name: 'Infura',
-        url: `https://mainnet.infura.io/v3/${INFURA_KEY}`
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
       },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
+      mevblockerRPC: {
+        name: 'MevblockerRPC',
+        url: 'https://rpc.mevblocker.io'
+      },
+      oneRPC: {
+        name: '1RPC',
+        url: 'https://1rpc.io/eth'
       }
     },
     multicall: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
+    routerContract: '0xd90e2f925DA726b50C4Ed8D0Fb90Ad053324F31b',
     registryContract: '0x58E8dCC13BE9780fC42E8723D8EaD4CF46943dF2',
     echoContractAccount: '0x9B27DD5Bb15d42DC224FCD0B7caEbBe16161Df42',
     aggregatorContract: '0xE8F47A78A6D52D317D0D2FFFac56739fE14D1b49',
@@ -79,9 +77,7 @@ export default {
       usdc: {
         instanceAddress: {
           '100': '0xd96f2B1c14Db8458374d9Aca76E26c3D18364307',
-          '1000': '0x4736dCf1b7A3d580672CcE6E7c65cd5cc9cFBa9D',
-          '10000': '',
-          '100000': ''
+          '1000': '0x4736dCf1b7A3d580672CcE6E7c65cd5cc9cFBa9D'
         },
         tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         symbol: 'USDC',
@@ -91,9 +87,7 @@ export default {
       usdt: {
         instanceAddress: {
           '100': '0x169AD27A470D064DEDE56a2D3ff727986b15D52B',
-          '1000': '0x0836222F2B2B24A3F36f98668Ed8F0B38D1a872f',
-          '10000': '',
-          '100000': ''
+          '1000': '0x0836222F2B2B24A3F36f98668Ed8F0B38D1a872f'
         },
         tokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
         symbol: 'USDT',
@@ -104,8 +98,7 @@ export default {
         instanceAddress: {
           '0.1': '0x178169B423a011fff22B9e3F3abeA13414dDD0F1',
           '1': '0x610B717796ad172B316836AC95a2ffad065CeaB4',
-          '10': '0xbB93e510BbCD0B7beb5A853875f9eC60275CF498',
-          '100': ''
+          '10': '0xbB93e510BbCD0B7beb5A853875f9eC60275CF498'
         },
         tokenAddress: '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',
         symbol: 'WBTC',
@@ -124,7 +117,7 @@ export default {
     'torn.contract.tornadocash.eth': '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
     'governance.contract.tornadocash.eth': '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce',
     'tornado-router.contract.tornadocash.eth': '0xd90e2f925DA726b50C4Ed8D0Fb90Ad053324F31b',
-    'staking-rewards.contract.tornadocash.eth': '0x2FC93484614a34f26F7970CBB94615bA109BB4bf'
+    'staking-rewards.contract.tornadocash.eth': '0x5B3f656C80E8ddb9ec01Dd9018815576E9238c29'
   },
   netId56: {
     rpcCallRetryAttempt: 15,
@@ -148,17 +141,13 @@ export default {
     multicall: '0x41263cba59eb80dc200f3e2544eda4ed6a90e76c',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicRpc1: {
-        name: 'BSC Public RPC 1',
-        url: 'https://bsc-dataseed.binance.org/'
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://bsc-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
       },
-      publicRpc2: {
-        name: 'BSC Public RPC 2',
-        url: 'https://bsc-dataseed1.defibit.io/'
-      },
-      publicRpc3: {
-        name: 'BSC Public RPC 3',
-        url: 'https://bsc-dataseed1.ninicoin.io/'
+      oneRPC: {
+        name: '1RPC',
+        url: 'https://1rpc.io/bnb'
       }
     },
     tokens: {
@@ -203,13 +192,13 @@ export default {
     multicall: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      Infura: {
-        name: 'Infura',
-        url: `https://polygon-mainnet.infura.io/v3/${INFURA_KEY}`
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://polygon-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
       },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_KEY}`
+      oneRpc: {
+        name: '1RPC',
+        url: 'https://1rpc.io/matic'
       }
     },
     tokens: {
@@ -255,13 +244,13 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     ovmGasPriceOracleContract: '0x420000000000000000000000000000000000000F',
     rpcUrls: {
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_OPTIMISM_KEY}`
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://optimism-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
       },
-      Infura: {
-        name: 'Infura',
-        url: `https://optimism-mainnet.infura.io/v3/${INFURA_KEY}`
+      oneRpc: {
+        name: '1RPC',
+        url: 'https://1rpc.io/op'
       }
     },
     tokens: {
@@ -306,17 +295,17 @@ export default {
     multicall: '0x842eC2c7D803033Edf55E478F461FC547Bc54EB2',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://arbitrum-one.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+      },
+      oneRpc: {
+        name: '1rpc',
+        url: 'https://1rpc.io/arb'
+      },
       Arbitrum: {
-        name: 'Arbitrum Public RPC',
+        name: 'Arbitrum RPC',
         url: 'https://arb1.arbitrum.io/rpc'
-      },
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_ARBITRUM_KEY}`
-      },
-      Infura: {
-        name: 'Infura',
-        url: `https://arbitrum-mainnet.infura.io/v3/${INFURA_KEY}`
       }
     },
     tokens: {
@@ -361,9 +350,13 @@ export default {
     multicall: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicRpc: {
-        name: 'Gnosis Chain RPC',
-        url: 'https://rpc.gnosischain.com/tornado'
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://gnosis-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+      },
+      blockPi: {
+        name: 'BlockPi',
+        url: 'https://gnosis.blockpi.network/v1/rpc/public'
       }
     },
     tokens: {
@@ -411,6 +404,14 @@ export default {
       publicRpc: {
         name: 'Avalanche RPC',
         url: 'https://api.avax.network/ext/bc/C/rpc'
+      },
+      meowRPC: {
+        name: 'Meow RPC',
+        url: 'https://avax.meowrpc.com'
+      },
+      oneRPC: {
+        name: 'OneRPC',
+        url: 'https://1rpc.io/avax/c'
       }
     },
     tokens: {
@@ -455,9 +456,13 @@ export default {
     echoContractAccount: '0x37e6859804b6499d1e4a86d70a5fdd5de6a0ac65',
     aggregatorContract: '0x8cb1436F64a3c33aD17bb42F94e255c4c0E871b2',
     rpcUrls: {
-      Alchemy: {
-        name: 'Alchemy',
-        url: `https://eth-goerli.alchemyapi.io/v2/${ALCHEMY_GOERLI_KEY}`
+      chainnodes: {
+        name: 'Tornado RPC',
+        url: 'https://goerli.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+      },
+      gatewayRPC: {
+        name: 'Gateway RPC',
+        url: 'https://rpc.goerli.eth.gateway.fm'
       }
     },
     tokens: {
@@ -498,9 +503,7 @@ export default {
       usdc: {
         instanceAddress: {
           '100': '0x05E0b5B40B7b66098C2161A5EE11C5740A3A7C45',
-          '1000': '0x23173fE8b96A4Ad8d2E17fB83EA5dcccdCa1Ae52',
-          '10000': '',
-          '100000': ''
+          '1000': '0x23173fE8b96A4Ad8d2E17fB83EA5dcccdCa1Ae52'
         },
         tokenAddress: '0xD87Ba7A50B2E7E660f678A895E4B72E7CB4CCd9C',
         symbol: 'USDC',
@@ -510,9 +513,7 @@ export default {
       usdt: {
         instanceAddress: {
           '100': '0x538Ab61E8A9fc1b2f93b3dd9011d662d89bE6FE6',
-          '1000': '0x94Be88213a387E992Dd87DE56950a9aef34b9448',
-          '10000': '',
-          '100000': ''
+          '1000': '0x94Be88213a387E992Dd87DE56950a9aef34b9448'
         },
         tokenAddress: '0xb7FC2023D96AEa94Ba0254AA5Aeb93141e4aad66',
         symbol: 'USDT',
@@ -523,8 +524,7 @@ export default {
         instanceAddress: {
           '0.1': '0x242654336ca2205714071898f67E254EB49ACdCe',
           '1': '0x776198CCF446DFa168347089d7338879273172cF',
-          '10': '0xeDC5d01286f99A066559F60a585406f3878a033e',
-          '100': ''
+          '10': '0xeDC5d01286f99A066559F60a585406f3878a033e'
         },
         tokenAddress: '0xC04B0d3107736C32e19F1c62b2aF67BE61d63a05',
         symbol: 'WBTC',

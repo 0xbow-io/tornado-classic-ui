@@ -1,7 +1,7 @@
 {
   "closeNotification": "Bildirimi Kapat",
-  "indexNotification": "Tornado.cash {link} deneysel bir yazılımdır. Lütfen riskin farkında olarak kullanın.",
-  "indexNotificationLinkText": "denetimden geçmiştir ve",
+  "indexNotification": "Tornado Cash artık topluluk tarafından yönetiliyor, daha fazla bilgi için {link} adresini ziyaret edin.",
+  "indexNotificationLinkText": "tornadocash.social",
   "binanceInternalTxsNotification": "Lütfen para çekme işlemleri için Binance cüzdanına ait adresleri kullanmayın. Dahili işlemler (Tornado.cash çekimleri dahil) şu anda Binance Exchange’de desteklenmemektedir. Paranızın hesabınıza yansıması ile ilgili sorunlarınız varsa Binance destek ile iletişime geçmelisiniz.",
   "deposit": "Yatırma",
   "depositButton": "Yatırma",
@@ -151,7 +151,7 @@
   "nullifierHash": "Nullifier Hash",
   "verified": "Onaylanmış",
   "generatePdfReport": "PDF rapora dönüştür.",
-  "compliancePrintWarning": "Bu Uyumluluk Raporu yalnızca bilgilendirme amaçlıdır. Bu raporun geçerliliğini Tornado’nun Uyumluluk Aracını (https://tornadocash.eth.link/compliance) veya burada yer alan bilgileri hesaplayabilen ve doğrulayabilen diğer herhangi bir şifreleme yazılımıyla (\"Tornado Uyumluluk Aracı\") kullanarak onaylamalısınız.) Bu raporda bulunan ve yukarıdaki araç tarafından sağlanan bilgiler arasındaki herhangi bir tutarsızlık, rapordaki bilgilerin yanlış ve/veya sahte olduğunu gösterir.{newline} UYGUNLUK RAPORU, HERHANGİ BİR GARANTİ OLMADAN tamamen\"OLDUĞU GİBİ\" SUNULMAKTADIR. BELİRLİ BİR AMACA UYGUNLUK VE İHLAL ETMEME GARANTİLERİ DAHİLDİR ANCAK BUNLARLA SINIRLI OLMAMAK ÜZERE ZIMNİ VEYA ZIMNİ OLARAK GEÇERLİDİR. TORNADO.CASH UYUM ARACININ YAZARLARI RAPORDAN KAYNAKLANAN, UYUMLULUKTAN KAYNAKLANAN VEYA BAĞLANTILI OLARAK SÖZLEŞME, HAKSIZ YA DA BAŞKA BİR DURUMDA OLAN HERHANGİ BİR İDDİADAN, ZARAR VEYA BAŞKA SORUMLULUKTAN SORUMLU TUTULAMAZ.",
+  "compliancePrintWarning": "Bu Uyumluluk Raporu yalnızca bilgilendirme amaçlıdır. Bu raporun geçerliliğini Tornado’nun Uyumluluk Aracını (https://tornado.ws/compliance) veya burada yer alan bilgileri hesaplayabilen ve doğrulayabilen diğer herhangi bir şifreleme yazılımıyla (\"Tornado Uyumluluk Aracı\") kullanarak onaylamalısınız.) Bu raporda bulunan ve yukarıdaki araç tarafından sağlanan bilgiler arasındaki herhangi bir tutarsızlık, rapordaki bilgilerin yanlış ve/veya sahte olduğunu gösterir.{newline} UYGUNLUK RAPORU, HERHANGİ BİR GARANTİ OLMADAN tamamen\"OLDUĞU GİBİ\" SUNULMAKTADIR. BELİRLİ BİR AMACA UYGUNLUK VE İHLAL ETMEME GARANTİLERİ DAHİLDİR ANCAK BUNLARLA SINIRLI OLMAMAK ÜZERE ZIMNİ VEYA ZIMNİ OLARAK GEÇERLİDİR. TORNADO.CASH UYUM ARACININ YAZARLARI RAPORDAN KAYNAKLANAN, UYUMLULUKTAN KAYNAKLANAN VEYA BAĞLANTILI OLARAK SÖZLEŞME, HAKSIZ YA DA BAŞKA BİR DURUMDA OLAN HERHANGİ BİR İDDİADAN, ZARAR VEYA BAŞKA SORUMLULUKTAN SORUMLU TUTULAMAZ.",
   "relayRequestFailed": "Relayer {relayerName} çöktü. lütfen başka bir relayer seçin.",
   "selectProvider": "Sağlayıcı seçin",
   "walletDoesNotSupported": "Bu cüzdan desteklenmiyor",

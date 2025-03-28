@@ -1,17 +1,25 @@
 import Web3 from 'web3'
 
-import { graph } from '@/services'
+import graph from '@/services/graph'
 import { download } from '@/store/snark'
-import networkConfig from '@/networkConfig'
+import networkConfig, { enabledChains, blockSyncInterval } from '@/networkConfig'
 import InstanceABI from '@/abis/Instance.abi.json'
-import { CONTRACT_INSTANCES, eventsType } from '@/constants'
-import { sleep, formatEvents, capitalizeFirstLetter } from '@/utils'
+import { CONTRACT_INSTANCES, eventsType, httpConfig } from '@/constants'
+import { sleep, flattenNArray, formatEvents, capitalizeFirstLetter } from '@/utils'
+
+let store
+if (process.browser) {
+  window.onNuxtReady(({ $store }) => {
+    store = $store
+  })
+}
 
 class EventService {
   constructor({ netId, amount, currency, factoryMethods }) {
     this.idb = window.$nuxt.$indexedDB(netId)
 
     const { nativeCurrency } = networkConfig[`netId${netId}`]
+    const hasCache = enabledChains.includes(netId.toString())
 
     this.netId = netId
     this.amount = amount
@@ -21,11 +29,20 @@ class EventService {
     this.contract = this.getContract({ netId, amount, currency })
 
     this.isNative = nativeCurrency === this.currency
-    this.hasCache = this.isNative && (Number(this.netId) === 1 || Number(this.netId) === 56)
+    this.hasCache = this.isNative && hasCache
   }
 
   getInstanceName(type) {
-    return `${type}s_${this.currency}_${this.amount}`
+    return `${type}s_${this.netId}_${this.currency}_${this.amount}`
+  }
+
+  updateEventProgress(percentage, type) {
+    if (store) {
+      store.dispatch('loading/updateProgress', {
+        message: `Fetching past ${type} events`,
+        progress: Math.ceil(percentage * 100)
+      })
+    }
   }
 
   async getEvents(type) {
@@ -34,14 +51,17 @@ class EventService {
     if (!cachedEvents && this.hasCache) {
       cachedEvents = await this.getEventsFromCache(type)
     }
+
     return cachedEvents
   }
+
   async updateEvents(type, cachedEvents) {
     const { deployedBlock } = networkConfig[`netId${this.netId}`]
 
     const savedEvents = cachedEvents || (await this.getEvents(type))
 
     let fromBlock = deployedBlock
+
     if (savedEvents) {
       fromBlock = savedEvents.lastBlock + 1
     }
@@ -58,7 +78,6 @@ class EventService {
       }
       return a.blockNumber - b.blockNumber
     })
-
     const lastBlock = allEvents[allEvents.length - 1].blockNumber
 
     this.saveEvents({ events: allEvents, lastBlock, type })
@@ -111,7 +130,7 @@ class EventService {
 
       const module = await download({
         contentType: 'string',
-        name: `events/${instanceName}.json.zip`
+        name: `events/${instanceName}.json.gz`
       })
 
       if (module) {
@@ -135,22 +154,15 @@ class EventService {
   async getEventsFromDB(type) {
     try {
       const instanceName = this.getInstanceName(type)
-
       const savedEvents = await this.idb.getAll({ storeName: instanceName })
 
       if (!savedEvents || !savedEvents.length) {
         return undefined
       }
 
-      const event = await this.idb.getFromIndex({
-        storeName: 'lastEvents',
-        indexName: 'name',
-        key: instanceName
-      })
-
       return {
         events: savedEvents,
-        lastBlock: event.blockNumber
+        lastBlock: savedEvents[savedEvents.length - 1].blockNumber
       }
     } catch (err) {
       return undefined
@@ -166,7 +178,7 @@ class EventService {
       return events
     }
 
-    const blockRange = 4950
+    const blockRange = Math.floor(blockSyncInterval / 2) - 1
     const fromBlock = deployedBlock
     const { blockDifference, currentBlockNumber } = await this.getBlocksDiff({ fromBlock })
 
@@ -232,75 +244,146 @@ class EventService {
     }
   }
 
-  async getEventsPartFromRpc({ fromBlock, toBlock, type }) {
+  getPastEvents({ fromBlock, toBlock, type }, shouldRetry = false, retries = 0) {
+    return new Promise((resolve, reject) => {
+      this.contract
+        .getPastEvents(capitalizeFirstLetter(type), {
+          fromBlock,
+          toBlock
+        })
+        .then((events) => resolve(events))
+        .catch((err) => {
+          retries++
+
+          // If provider.getBlockNumber returned last block that isn't accepted (happened on Avalanche/Gnosis),
+          // get events to last accepted block
+          if (err.message.includes('after last accepted block')) {
+            const acceptedBlock = parseInt(err.message.split('after last accepted block ')[1])
+            toBlock = acceptedBlock
+            // Retries to 0, because it is not RPC error
+            retries = 0
+          }
+
+          // maximum 5 second buffer for rate-limiting
+          if (shouldRetry) {
+            const shouldRetryAgain = retries < 5
+
+            sleep(1000 * retries).then(() =>
+              this.getPastEvents({ fromBlock, toBlock, type }, shouldRetryAgain, retries)
+                .then((events) => resolve(events))
+                .catch((_) => resolve(undefined))
+            )
+          } else {
+            reject(new Error(err))
+          }
+        })
+    })
+  }
+
+  async getEventsPartFromRpc(parameters, shouldRetry = false) {
     try {
+      const { fromBlock, type } = parameters
       const { currentBlockNumber } = await this.getBlocksDiff({ fromBlock })
 
-      if (fromBlock > currentBlockNumber) {
+      if (fromBlock < currentBlockNumber) {
+        const eventsPart = await this.getPastEvents(parameters, shouldRetry)
+
+        if (eventsPart) {
+          if (eventsPart.length > 0) {
+            return {
+              events: formatEvents(eventsPart, type),
+              lastBlock: eventsPart[eventsPart.length - 1].blockNumber
+            }
+          } else {
+            return {
+              events: [],
+              lastBlock: fromBlock
+            }
+          }
+        } else {
+          return undefined
+        }
+      } else {
         return {
           events: [],
           lastBlock: fromBlock
         }
-      }
-
-      const events = await this.contract.getPastEvents(capitalizeFirstLetter(type), {
-        fromBlock,
-        toBlock
-      })
-
-      if (!events?.length) {
-        return {
-          events: [],
-          lastBlock: fromBlock
-        }
-      }
-      return {
-        events: formatEvents(events, type),
-        lastBlock: events[events.length - 1].blockNumber
       }
     } catch (err) {
       return undefined
     }
   }
 
+  createBatchRequest(batchArray) {
+    return batchArray.map(
+      (e, i) =>
+        new Promise((resolve) =>
+          sleep(20 * i).then(() =>
+            this.getEventsPartFromRpc({ ...e }, true).then((batch) => {
+              if (!batch) {
+                resolve([{ isFailedBatch: true, ...e }])
+              } else {
+                resolve(batch.events)
+              }
+            })
+          )
+        )
+    )
+  }
+
   async getBatchEventsFromRpc({ fromBlock, type }) {
     try {
-      const blockRange = 4950
+      const batchSize = 10
+
+      let [events, failed] = [[], []]
+      let lastBlock = fromBlock
+
       const { blockDifference, currentBlockNumber } = await this.getBlocksDiff({ fromBlock })
+      const batchDigest = blockDifference === 0 ? 1 : Math.ceil(blockDifference / blockSyncInterval)
 
-      let numberParts = blockDifference === 0 ? 1 : Math.ceil(blockDifference / blockRange)
-      const part = Math.ceil(blockDifference / numberParts)
-
-      let events = []
-      let toBlock = fromBlock + part
+      const blockDenom = Math.ceil(blockDifference / batchDigest)
+      const batchCount = Math.ceil(batchDigest / batchSize)
 
       if (fromBlock < currentBlockNumber) {
-        if (toBlock >= currentBlockNumber) {
-          toBlock = 'latest'
-          numberParts = 1
+        this.updateEventProgress(0, type)
+
+        for (let batchIndex = 0; batchIndex < batchCount; batchIndex++) {
+          const isLastBatch = batchIndex === batchCount - 1
+          const params = new Array(batchSize).fill('').map((_, i) => {
+            const toBlock = (i + 1) * blockDenom + lastBlock
+            const fromBlock = toBlock - blockDenom
+            return { fromBlock, toBlock, type }
+          })
+          const batch = await Promise.all(this.createBatchRequest(params))
+          const requests = flattenNArray(batch)
+
+          events = events.concat(requests.filter((e) => !e.isFailedBatch))
+          failed = failed.concat(requests.filter((e) => e.isFailedBatch))
+          lastBlock = params[batchSize - 1].toBlock
+
+          const progressIndex = batchIndex - failed.length / batchSize
+
+          if (isLastBatch && failed.length !== 0) {
+            const failedBatch = await Promise.all(this.createBatchRequest(failed))
+            const failedReqs = flattenNArray(failedBatch)
+            const failedRept = failedReqs.filter((e) => e.isFailedBatch)
+
+            if (failedRept.length === 0) {
+              events = events.concat(failedReqs)
+            } else {
+              throw new Error('Failed to batch events')
+            }
+          }
+          this.updateEventProgress(progressIndex / batchCount, type)
         }
 
-        for (let i = 0; i < numberParts; i++) {
-          try {
-            await sleep(200)
-            const partOfEvents = await this.getEventsPartFromRpc({ fromBlock, toBlock, type })
-            if (partOfEvents) {
-              events = events.concat(partOfEvents.events)
-            }
-            fromBlock = toBlock
-            toBlock += part
-          } catch {
-            numberParts = numberParts + 1
-          }
+        return {
+          lastBlock: events[events.length - 1].blockNumber,
+          events
         }
-        if (events.length) {
-          return {
-            events,
-            lastBlock: toBlock === 'latest' ? currentBlockNumber : toBlock
-          }
-        }
+      } else {
+        return undefined
       }
-      return undefined
     } catch (err) {
       return undefined
     }
@@ -308,15 +391,18 @@ class EventService {
 
   async getEventsFromRpc({ fromBlock, type }) {
     try {
+      const { blockDifference } = await this.getBlocksDiff({ fromBlock })
+
       let events
 
-      if (Number(this.netId) === 56) {
-        const rpcEvents = await this.getBatchEventsFromRpc({ fromBlock, type })
-        events = rpcEvents?.events || []
-      } else {
+      if (blockDifference < blockSyncInterval) {
         const rpcEvents = await this.getEventsPartFromRpc({ fromBlock, toBlock: 'latest', type })
         events = rpcEvents?.events || []
+      } else {
+        const rpcEvents = await this.getBatchEventsFromRpc({ fromBlock, type })
+        events = rpcEvents?.events || []
       }
+
       return events
     } catch (err) {
       return []
@@ -326,11 +412,10 @@ class EventService {
   async getEventsFromBlock({ fromBlock, graphMethod, type }) {
     try {
       // ToDo think about undefined
-      const graphEvents = await this.getEventsFromGraph({ fromBlock, methodName: graphMethod })
-      const lastSyncBlock = fromBlock > graphEvents?.lastBlock ? fromBlock : graphEvents?.lastBlock
-      const rpcEvents = await this.getEventsFromRpc({ fromBlock: lastSyncBlock, type })
+      const rpcEvents = await this.getEventsFromRpc({ fromBlock, type })
 
-      const allEvents = [].concat(graphEvents?.events || [], rpcEvents || [])
+      const allEvents = [].concat(rpcEvents || [])
+
       if (allEvents.length) {
         return {
           events: allEvents,
@@ -373,7 +458,9 @@ class EventsFactory {
   instances = new Map()
 
   constructor(rpcUrl) {
-    this.provider = new Web3(rpcUrl).eth
+    const httpProvider = new Web3.providers.HttpProvider(rpcUrl, httpConfig)
+
+    this.provider = new Web3(httpProvider).eth
   }
 
   getBlockNumber = () => {
@@ -385,7 +472,8 @@ class EventsFactory {
   }
 
   getService = (payload) => {
-    const instanceName = `${payload.currency}_${payload.amount}`
+    const instanceName = `${payload.netId}_${payload.currency}_${payload.amount}`
+
     if (this.instances.has(instanceName)) {
       return this.instances.get(instanceName)
     }

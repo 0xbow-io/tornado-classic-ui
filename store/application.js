@@ -3,13 +3,12 @@
 import Web3 from 'web3'
 
 import networkConfig from '@/networkConfig'
-import { cachedEventsLength, eventsType } from '@/constants'
+import { cachedEventsLength, eventsType, httpConfig } from '@/constants'
 
 import MulticallABI from '@/abis/Multicall.json'
 import InstanceABI from '@/abis/Instance.abi.json'
 import TornadoProxyABI from '@/abis/TornadoProxy.abi.json'
 
-import { ACTION, ACTION_GAS } from '@/constants/variables'
 import { graph, treesInterface, EventsFactory } from '@/services'
 
 import {
@@ -18,7 +17,6 @@ import {
   toFixedHex,
   saveAsFile,
   isEmptyArray,
-  decimalPlaces,
   parseHexNote,
   checkCommitments,
   buffPedersenHash
@@ -28,7 +26,7 @@ import { buildGroth16, download, getTornadoKeys } from './snark'
 
 let groth16
 
-const websnarkUtils = require('websnark/src/utils')
+const websnarkUtils = require('@tornado/websnark/src/utils')
 const { toWei, numberToHex, toBN, isAddress } = require('web3-utils')
 
 const getStatisticStore = (acc, { tokens }) => {
@@ -117,7 +115,8 @@ const getters = {
     const config = networkConfig[`netId${netId}`]
     const { url } = rootState.settings[`netId${netId}`].rpc
     const address = config.tokens[currency].instanceAddress[amount]
-    const web3 = new Web3(url)
+    const httpProvider = new Web3.providers.HttpProvider(url, httpConfig)
+    const web3 = new Web3(httpProvider)
     return new web3.eth.Contract(InstanceABI, address)
   },
   multicallContract: (state, getters, rootState) => ({ netId }) => {
@@ -141,54 +140,24 @@ const getters = {
   currentContract: (state, getters) => (params) => {
     return getters.tornadoProxyContract(params)
   },
-  withdrawGas: (state, getters) => {
-    let action = ACTION.WITHDRAW_WITH_EXTRA
+  relayerWithdrawalTxData: (state, getters, rootState, rootGetters) => ({
+    proof,
+    withdrawCallArgs,
+    currency,
+    amount
+  }) => {
+    const netId = rootGetters['metamask/netId']
+    const tornadoProxy = getters.tornadoProxyContract({ netId })
+    const tornadoInstance = getters.instanceContract({ currency, amount, netId })
 
-    if (getters.hasEnabledLightProxy) {
-      action = ACTION.WITHDRAW
-    }
+    const calldata = tornadoProxy.methods
+      .withdraw(tornadoInstance._address, proof, ...withdrawCallArgs)
+      .encodeABI()
 
-    if (getters.isOptimismConnected) {
-      action = ACTION.OP_WITHDRAW
-    }
-
-    if (getters.isArbitrumConnected) {
-      action = ACTION.ARB_WITHDRAW
-    }
-
-    return ACTION_GAS[action]
-  },
-  networkFee: (state, getters, rootState, rootGetters) => {
-    const gasPrice = rootGetters['gasPrices/gasPrice']
-
-    const networkFee = toBN(gasPrice).mul(toBN(getters.withdrawGas))
-
-    if (getters.isOptimismConnected) {
-      const l1Fee = rootGetters['gasPrices/l1Fee']
-      return networkFee.add(toBN(l1Fee))
-    }
-
-    return networkFee
-  },
-  relayerFee: (state, getters, rootState, rootGetters) => {
-    const { currency, amount } = rootState.application.selectedStatistic
-    const { decimals } = rootGetters['metamask/networkConfig'].tokens[currency]
-    const nativeCurrency = rootGetters['metamask/nativeCurrency']
-    const total = toBN(rootGetters['token/fromDecimals'](amount.toString()))
-    const fee = rootState.relayer.selectedRelayer.tornadoServiceFee
-    const decimalsPoint = decimalPlaces(fee)
-    const roundDecimal = 10 ** decimalsPoint
-    const aroundFee = toBN(parseInt(fee * roundDecimal, 10))
-    const tornadoServiceFee = total.mul(aroundFee).div(toBN(roundDecimal * 100))
-    const ethFee = getters.networkFee
-    switch (currency) {
-      case nativeCurrency: {
-        return ethFee.add(tornadoServiceFee)
-      }
-      default: {
-        const tokenFee = ethFee.mul(toBN(10 ** decimals)).div(toBN(rootState.price.prices[currency]))
-        return tokenFee.add(tornadoServiceFee)
-      }
+    return {
+      to: tornadoProxy._address,
+      data: calldata,
+      value: withdrawCallArgs[5] || 0
     }
   },
   ethToReceiveInToken: (state, getters, rootState, rootGetters) => {
@@ -203,7 +172,7 @@ const getters = {
     let total = toBN(rootGetters['token/fromDecimals'](amount.toString()))
 
     if (state.withdrawType === 'relayer') {
-      const relayerFee = getters.relayerFee
+      const relayerFee = rootState.fees.withdrawalFeeViaRelayer
       const nativeCurrency = rootGetters['metamask/nativeCurrency']
 
       if (currency === nativeCurrency) {
@@ -221,9 +190,8 @@ const getters = {
     const { decimals } = rootGetters['metamask/networkConfig'].tokens[currency]
     const total = toBN(rootGetters['token/fromDecimals'](amount.toString()))
     const price = rootState.price.prices[currency]
-    const relayerFee = getters.relayerFee
     return total
-      .sub(relayerFee)
+      .sub(rootState.fees.withdrawalFeeViaRelayer)
       .mul(toBN(price))
       .div(toBN(10 ** decimals))
   },
@@ -258,6 +226,7 @@ const getters = {
 const actions = {
   setAndUpdateStatistic({ dispatch, commit }, { currency, amount }) {
     commit('SET_SELECTED_STATISTIC', { currency, amount })
+
     dispatch('updateSelectEvents')
   },
   async updateSelectEvents({ dispatch, commit, state, rootGetters, getters }) {
@@ -265,15 +234,14 @@ const actions = {
     const { currency, amount } = state.selectedStatistic
 
     const eventService = getters.eventsInterface.getService({ netId, amount, currency })
-
     const graphEvents = await eventService.getEventsFromGraph({ methodName: 'getStatistic' })
 
     let statistic = graphEvents?.events
 
-    if (!statistic || !statistic.length) {
-      const fresh = await eventService.getStatisticsRpc({ eventsCount: 10 })
+    const latestDeposits = []
 
-      statistic = fresh || []
+    if (!statistic || !statistic.length) {
+      statistic = []
     }
 
     const { nextDepositIndex, anonymitySet } = await dispatch('getLastDepositIndex', {
@@ -283,8 +251,6 @@ const actions = {
     })
 
     statistic = statistic.sort((a, b) => a.leafIndex - b.leafIndex)
-
-    const latestDeposits = []
 
     for (const event of statistic.slice(-10)) {
       latestDeposits.unshift({
@@ -325,7 +291,7 @@ const actions = {
       lastBlock = await this.$indexedDB(netId).getFromIndex({
         indexName: 'name',
         storeName: 'lastEvents',
-        key: `${type}s_${currency}_${amount}`
+        key: `${type}s_${netId}_${currency}_${amount}`
       })
     }
 
@@ -358,7 +324,7 @@ const actions = {
     try {
       const module = await download({
         contentType: 'string',
-        name: `events/encrypted_notes_${netId}.json.zip`
+        name: `events/encrypted_notes_${netId}.json.gz`
       })
 
       if (module) {
@@ -577,16 +543,17 @@ const actions = {
       }
 
       const data = contractInstance.methods.deposit(...params).encodeABI()
-      const gas = await contractInstance.methods.deposit(...params).estimateGas({ from: ethAccount, value })
+      const incompletedTx = {
+        from: ethAccount,
+        to: contractInstance._address,
+        value: numberToHex(value),
+        data
+      }
+      const gasLimit = await rootGetters['fees/oracle'].getGasLimit(incompletedTx, 'other', 10)
 
       const callParams = {
         method: 'eth_sendTransaction',
-        params: {
-          to: contractInstance._address,
-          gas: numberToHex(gas + 50000),
-          value: numberToHex(value),
-          data
-        },
+        params: Object.assign({ gas: numberToHex(gasLimit) }, incompletedTx),
         watcherParams: {
           title: { path: 'depositing', amount, currency },
           successTitle: {
@@ -662,7 +629,7 @@ const actions = {
     }
   },
   async buildTree({ dispatch }, { currency, amount, netId, commitmentHex }) {
-    const treeInstanceName = `${currency}_${amount}`
+    const treeInstanceName = `${netId}_${currency}_${amount}`
     const params = { netId, amount, currency }
 
     const treeService = treesInterface.getService({
@@ -696,7 +663,7 @@ const actions = {
     return { tree, root }
   },
   async createSnarkProof(
-    { rootGetters, rootState, state, getters },
+    { rootGetters, rootState, state, getters, dispatch },
     { root, note, tree, recipient, leafIndex }
   ) {
     const { pathElements, pathIndices } = tree.path(leafIndex)
@@ -705,59 +672,73 @@ const actions = {
     const nativeCurrency = rootGetters['metamask/nativeCurrency']
     const withdrawType = state.withdrawType
 
-    let relayer = BigInt(recipient)
+    let relayer = BigInt(0)
     let fee = BigInt(0)
     let refund = BigInt(0)
 
-    if (withdrawType === 'relayer') {
-      let totalRelayerFee = getters.relayerFee
-      relayer = BigInt(rootState.relayer.selectedRelayer.address)
-
-      if (note.currency !== nativeCurrency) {
-        refund = BigInt(state.ethToReceive.toString())
-        totalRelayerFee = totalRelayerFee.add(getters.ethToReceiveInToken)
+    async function calculateSnarkProof() {
+      const input = {
+        // public
+        fee,
+        root,
+        refund,
+        relayer,
+        recipient: BigInt(recipient),
+        nullifierHash: note.nullifierHash,
+        // private
+        pathIndices,
+        pathElements,
+        secret: note.secret,
+        nullifier: note.nullifier
       }
 
-      fee = BigInt(totalRelayerFee.toString())
+      const { circuit, provingKey } = await getTornadoKeys()
+
+      if (!groth16) {
+        groth16 = await buildGroth16()
+      }
+
+      console.log('Start generating SNARK proof', input)
+      console.time('SNARK proof time')
+      const proofData = await websnarkUtils.genWitnessAndProve(groth16, input, circuit, provingKey)
+      const { proof } = websnarkUtils.toSolidityInput(proofData)
+
+      const args = [
+        toFixedHex(input.root),
+        toFixedHex(input.nullifierHash),
+        toFixedHex(input.recipient, 20),
+        toFixedHex(input.relayer, 20),
+        toFixedHex(input.fee),
+        toFixedHex(input.refund)
+      ]
+      console.timeEnd('SNARK proof time')
+      return { args, proof }
     }
 
-    const input = {
-      // public
-      fee,
-      root,
-      refund,
-      relayer,
-      recipient: BigInt(recipient),
-      nullifierHash: note.nullifierHash,
-      // private
-      pathIndices,
-      pathElements,
-      secret: note.secret,
-      nullifier: note.nullifier
-    }
+    // Don't need to calculate or estimate relayer fee, so, return proof immediately
+    if (withdrawType !== 'relayer') return calculateSnarkProof()
 
-    const { circuit, provingKey } = await getTornadoKeys()
+    relayer = BigInt(rootState.relayer.selectedRelayer.address)
+    fee = BigInt(rootState.fees.withdrawalFeeViaRelayer)
+    const naiveProof = await calculateSnarkProof()
+    if (Number(note.netId) === 1) return naiveProof // Don't need to smart-estimate fee if we use V4 withdrawal
 
-    if (!groth16) {
-      groth16 = await buildGroth16()
-    }
+    const { proof: dummyProof, args: dummyArgs } = naiveProof
+    const withdrawalTx = getters.relayerWithdrawalTxData({
+      proof: dummyProof,
+      withdrawCallArgs: dummyArgs,
+      amount: note.amount,
+      currency: note.currency
+    })
+    if (note.currency !== nativeCurrency) refund = BigInt(state.ethToReceive.toString())
 
-    console.log('Start generating SNARK proof', input)
-    console.time('SNARK proof time')
-    const proofData = await websnarkUtils.genWitnessAndProve(groth16, input, circuit, provingKey)
-    const { proof } = websnarkUtils.toSolidityInput(proofData)
+    await dispatch('fees/calculateWithdrawalFeeViaRelayer', { tx: withdrawalTx }, { root: true })
+    fee = BigInt(rootState.fees.withdrawalFeeViaRelayer)
 
-    const args = [
-      toFixedHex(input.root),
-      toFixedHex(input.nullifierHash),
-      toFixedHex(input.recipient, 20),
-      toFixedHex(input.relayer, 20),
-      toFixedHex(input.fee),
-      toFixedHex(input.refund)
-    ]
-    return { args, proof }
+    // Recalculate proof with actual fee and refund
+    return calculateSnarkProof()
   },
-  async prepareWithdraw({ dispatch, getters, commit }, { note, recipient }) {
+  async prepareWithdraw({ dispatch, commit }, { note, recipient }) {
     commit('REMOVE_PROOF', { note })
     try {
       const parsedNote = parseNote(note)
@@ -777,14 +758,13 @@ const actions = {
         note: parsedNote,
         leafIndex: tree.indexOf(parsedNote.commitmentHex)
       })
-      console.timeEnd('SNARK proof time')
       commit('SAVE_PROOF', { proof, args, note })
     } catch (e) {
       console.error('prepareWithdraw', e)
       throw new Error(e.message)
     }
   },
-  async withdraw({ state, rootState, dispatch, getters }, { note }) {
+  async withdraw({ state, rootState, rootGetters, dispatch, getters }, { note }) {
     try {
       const [, currency, amount, netId] = note.split('-')
       const config = networkConfig[`netId${netId}`]
@@ -797,18 +777,17 @@ const actions = {
       const params = [instance, proof, ...args]
 
       const data = contractInstance.methods.withdraw(...params).encodeABI()
-      const gas = await contractInstance.methods
-        .withdraw(...params)
-        .estimateGas({ from: ethAccount, value: args[5] })
+      const incompletedTx = {
+        data,
+        value: args[5],
+        to: contractInstance._address,
+        from: ethAccount
+      }
+      const gasLimit = await rootGetters['fees/oracle'].getGasLimit(incompletedTx, 'other', 20)
 
       const callParams = {
         method: 'eth_sendTransaction',
-        params: {
-          data,
-          value: args[5],
-          to: contractInstance._address,
-          gas: numberToHex(gas + 200000)
-        },
+        params: Object.assign({ gas: numberToHex(gasLimit) }, incompletedTx),
         watcherParams: {
           title: { path: 'withdrawing', amount, currency },
           successTitle: {
@@ -945,18 +924,8 @@ const actions = {
       console.error(`Method loadWithdrawalData has error: ${e}`)
     }
   },
-  calculateEthToReceive({ commit, state, rootGetters }, { currency }) {
-    const gasLimit = rootGetters['metamask/networkConfig'].tokens[currency].gasLimit
-    const gasPrice = toBN(rootGetters['gasPrices/gasPrice'])
-
-    const ethToReceive = gasPrice
-      .mul(toBN(gasLimit))
-      .mul(toBN(2))
-      .toString()
-    return ethToReceive
-  },
-  async setDefaultEthToReceive({ dispatch, commit }, { currency }) {
-    const ethToReceive = await dispatch('calculateEthToReceive', { currency })
+  async setDefaultEthToReceive({ commit, rootGetters }, { currency }) {
+    const ethToReceive = await rootGetters['fees/oracle'].calculateRefundInETH(currency.toLowerCase())
     commit('SAVE_ETH_TO_RECEIVE', { ethToReceive })
     commit('SAVE_DEFAULT_ETH_TO_RECEIVE', { ethToReceive })
   },

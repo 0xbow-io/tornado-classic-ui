@@ -10,6 +10,8 @@ import networkConfig from '@/networkConfig'
 import GovernanceABI from '@/abis/Governance.abi.json'
 import AggregatorABI from '@/abis/Aggregator.abi.json'
 
+import { httpConfig } from '@/constants'
+
 const { numberToHex, toWei, fromWei, toBN, hexToNumber, hexToNumberString } = require('web3-utils')
 
 const state = () => {
@@ -35,7 +37,7 @@ const state = () => {
       EXECUTION_DELAY: 172800,
       EXECUTION_EXPIRATION: 259200,
       PROPOSAL_THRESHOLD: '1000000000000000000000',
-      QUORUM_VOTES: '25000000000000000000000',
+      QUORUM_VOTES: '100000000000000000000000',
       VOTING_PERIOD: 432000
     }
   }
@@ -47,7 +49,9 @@ const getters = {
   },
   getWeb3: (state, getters, rootState) => ({ netId }) => {
     const { url } = rootState.settings[`netId${netId}`].rpc
-    return new Web3(url)
+    const httpProvider = new Web3.providers.HttpProvider(url, httpConfig)
+
+    return new Web3(httpProvider)
   },
   govContract: (state, getters, rootState) => ({ netId }) => {
     const config = getters.getConfig({ netId })
@@ -175,15 +179,35 @@ const actions = {
   ) {
     try {
       const { ethAccount } = rootState.metamask
+      const { lockedBalance, constants, delegators } = state
       const netId = rootGetters['metamask/netId']
+
+      const proposalThreshold = toBN(constants.PROPOSAL_THRESHOLD)
+      const proposeIndependently = toBN(lockedBalance).gte(proposalThreshold)
 
       const govInstance = getters.govContract({ netId })
       const json = JSON.stringify({ title, description })
-      const data = await govInstance.methods.propose(proposalAddress, json).encodeABI()
+      const delegatorAddress = delegators[delegators.length - 1]
 
-      const gas = await govInstance.methods
-        .propose(proposalAddress, json)
-        .estimateGas({ from: ethAccount, value: 0 })
+      let data, gas
+
+      if (proposeIndependently) {
+        data = await govInstance.methods.propose(proposalAddress, json).encodeABI()
+        gas = await govInstance.methods.propose(proposalAddress, json).estimateGas({
+          from: ethAccount,
+          value: 0
+        })
+      } else {
+        data = await govInstance.methods
+          .proposeByDelegate(delegatorAddress, proposalAddress, json)
+          .encodeABI()
+        gas = await govInstance.methods
+          .proposeByDelegate(delegatorAddress, proposalAddress, json)
+          .estimateGas({
+            from: ethAccount,
+            value: 0
+          })
+      }
 
       const callParams = {
         method: 'eth_sendTransaction',
@@ -681,6 +705,21 @@ const actions = {
               break
             case 13:
               text = text.replace(/\\\\n\\\\n(\s)?(\\n)?/g, '\\n')
+              break
+            // Fix invalid JSON in proposal 15: replace single quotes with double and add comma before description
+            case 15:
+              text = text.replaceAll(`'`, `"`)
+              text = text.replace('"description"', ',"description"')
+              break
+            case 16:
+              text = text.replace('#16: ', '')
+              break
+            // Add title to empty (without title and description) hacker proposal 21
+            case 21:
+              return {
+                title: 'Proposal #21: Restore Governance',
+                description: ''
+              }
           }
         }
 

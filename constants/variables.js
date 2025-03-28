@@ -60,6 +60,12 @@ export const cachedEventsLength = {
   }
 }
 
+export const httpConfig = {
+  // buffer for tor connections
+  timeout: 30000,
+  keepAlive: true
+}
+
 export const PROVIDERS = {
   walletConnect: {
     name: 'WalletConnect',
@@ -84,7 +90,7 @@ export const PROVIDERS = {
 export const REGISTRY_DEPLOYED_BLOCK = {
   1: 14173129
 }
-export const DONATIONS_ADDRESS = '0x08ec3A4e3873505D34450b0F726136E1BF0c9DF7'
+export const DONATIONS_ADDRESS = '0xB008Ce23852Be9e7d43638432617617b2e07B41e'
 
 export const trees = {
   PARTS_COUNT: 4,
