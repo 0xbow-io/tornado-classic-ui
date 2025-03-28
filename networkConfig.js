@@ -1,3 +1,11 @@
+const {
+  ALCHEMY_MAINNET_KEY,
+  ALCHEMY_GOERLI_KEY,
+  ALCHEMY_OPTIMISM_KEY,
+  ALCHEMY_ARBITRUM_KEY,
+  ALCHEMY_POLYGON_KEY
+} = process.env
+
 export const blockSyncInterval = 10000
 export const enabledChains = ['1', '5', '10', '56', '100', '137', '42161', '43114']
 export default {
@@ -23,7 +31,7 @@ export default {
     rpcUrls: {
       chainnodes: {
         name: 'Tornado RPC',
-        url: 'https://mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
       },
       mevblockerRPC: {
         name: 'MevblockerRPC',
@@ -194,7 +202,7 @@ export default {
     rpcUrls: {
       chainnodes: {
         name: 'Tornado RPC',
-        url: 'https://polygon-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_KEY}`
       },
       oneRpc: {
         name: '1RPC',
