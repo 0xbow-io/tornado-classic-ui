@@ -1,7 +1,7 @@
 {
   "closeNotification": "Close notification",
-  "indexNotification": "Tornado Cash is now being maintained by the community, for more information visit {link}",
-  "indexNotificationLinkText": "tornadocash.community",
+  "indexNotification": "THIS VERSION OF TORNADO CASH CAN ONLY BE USED TO DONATE TO COINCENTER, ONLY WITHDRAW USING THIS INTERFACE IF YOU WANT TO DONATE YOUR FUNDS TO COINCENTER.",
+  "indexNotificationLinkText": "",
   "binanceInternalTxsNotification": "Please, do not use Binance wallet addresses for withdrawals. Internal transactions (including Tornado.cash withdrawals) are not currently supported on Binance Exchange. If you have an issue receiving your funds, you should contact Binance support.",
   "deposit": "Deposit",
   "depositButton": "Deposit",
