@@ -1,7 +1,7 @@
 {
   "closeNotification": "Close notification",
-  "indexNotification": "Tornado.cash {link}. However, it is still an experimental software. Please use at your own risk.",
-  "indexNotificationLinkText": "was audited",
+  "indexNotification": "THIS VERSION OF TORNADO CASH CAN ONLY BE USED TO DONATE TO COINCENTER, ONLY WITHDRAW USING THIS INTERFACE IF YOU WANT TO DONATE YOUR FUNDS TO COINCENTER.",
+  "indexNotificationLinkText": "",
   "binanceInternalTxsNotification": "Please, do not use Binance wallet addresses for withdrawals. Internal transactions (including Tornado.cash withdrawals) are not currently supported on Binance Exchange. If you have an issue receiving your funds, you should contact Binance support.",
   "deposit": "Deposit",
   "depositButton": "Deposit",
