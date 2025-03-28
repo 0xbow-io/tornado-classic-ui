@@ -1,3 +1,5 @@
+<!--
+
 <template>
   <div class="notices is-top">
     <b-notification
@@ -41,6 +43,8 @@
     </b-notification>
   </div>
 </template>
+
+-->
 
 <script>
 import { mapState, mapGetters, mapActions } from 'vuex'

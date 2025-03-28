@@ -290,6 +290,7 @@ export const actions = {
 
     return result
   },
+  
   async pickRandomRelayer({ rootGetters, commit, dispatch, getters }) {
     const netId = rootGetters['metamask/netId']
     const { ensSubdomainKey } = rootGetters['metamask/networkConfig']

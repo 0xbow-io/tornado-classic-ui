@@ -4,9 +4,9 @@
       <div class="level">
         <div class="level-left">
           <div class="level-item is-column">
-            <div class="level-subitem footer-address">
+        <!-- <div class="level-subitem footer-address">
               <div class="footer-address__name">
-                {{ $t('donationsAddress') }}
+             //   {{ $t('donationsAddress') }}
               </div>
               <a
                 class="footer-address__value"
@@ -15,7 +15,7 @@
                 rel="noopener noreferrer"
                 >{{ donationsAddress }}</a
               >
-            </div>
+            </div> -->
             <div class="level-subitem">
               Tornado.cash version:
               <span class="footer-version__value">{{ commit }}</span>
@@ -26,6 +26,8 @@
           <div class="level-item is-column">
             <div class="level-subitem">
               <div class="buttons">
+                
+<!-- kill old dune
                 <b-button
                   tag="a"
                   type="is-icon"
@@ -34,18 +36,19 @@
                   rel="noopener noreferrer"
                   icon-right="stats"
                 ></b-button>
+-->
                 <b-button
                   tag="a"
                   type="is-icon"
-                  href="https://development.tornadocash.community/tornadocash/classic-ui"
+                  href="https://x.com/0xbowio"
                   target="_blank"
                   rel="noopener noreferrer"
-                  icon-right="git"
+                  icon-right="twitter"
                 ></b-button>
                 <b-button
                   tag="a"
                   type="is-icon"
-                  href="https://github.com/tornadocash"
+                  href="https://github.com/0xbow-io"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="github"

@@ -1,3 +1,16 @@
+const {
+  ALCHEMY_MAINNET_KEY,
+  ALCHEMY_GOERLI_KEY,
+  ALCHEMY_OPTIMISM_KEY,
+  ALCHEMY_ARBITRUM_KEY,
+  ALCHEMY_POLYGON_KEY,
+  ALCHEMY_BSC_KEY,
+  ALCHEMY_AVAX_KEY,
+  ALCHEMY_GNOSIS_KEY
+} = process.env
+
+export const blockSyncInterval = 10000
+export const enabledChains = ['1', '5', '10', '56', '100', '137', '42161', '43114']
 export default {
   netId1: {
     rpcCallRetryAttempt: 15,
@@ -19,10 +32,19 @@ export default {
     networkName: 'Ethereum Mainnet',
     deployedBlock: 9116966,
     rpcUrls: {
-      secureRPC: {
-        name: 'SecureRPC',
-        url: 'https://api.securerpc.com/v1'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
       }
+//      ,
+//      mevblockerRPC: {
+//        name: 'MevblockerRPC',
+//        url: 'https://rpc.mevblocker.io'
+//      },
+//      oneRPC: {
+//        name: '1RPC',
+//        url: 'https://1rpc.io/eth'
+//      }
     },
     multicall: '0xeefba1e63905ef1d7acba5a8513c70307c1ce441',
     registryContract: '0x58E8dCC13BE9780fC42E8723D8EaD4CF46943dF2',
@@ -134,19 +156,20 @@ export default {
     deployedBlock: 8158799,
     multicall: '0x41263cba59eb80dc200f3e2544eda4ed6a90e76c',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
+    
     rpcUrls: {
-      oneRPC: {
-        name: '1RPC',
-        url: 'https://1rpc.io/bnb'
-      },
-      blockPi: {
-        name: 'BlockPi',
-        url: 'https://bsc.blockpi.network/v1/rpc/public'
-      },
-      nodeReal: {
-        name: 'NodeReal',
-        url: 'https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_BSC_KEY}`
       }
+//      chainnodes: {
+//        name: 'Tornado RPC',
+//        url: 'https://bsc-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+//      },
+//      oneRPC: {
+//        name: '1RPC',
+//        url: 'https://1rpc.io/bnb'
+//      }
     },
     tokens: {
       bnb: {
@@ -190,14 +213,15 @@ export default {
     multicall: '0x11ce4B23bD875D7F5C6a31084f55fDe1e9A87507',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      polygonRpc: {
-        name: 'Polygon RPC',
-        url: 'https://polygon-rpc.com'
-      },
-      oneRpc: {
-        name: '1RPC',
-        url: 'https://1rpc.io/matic'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_KEY}`
       }
+      //,
+     // oneRpc: {
+     //   name: '1RPC',
+     //   url: 'https://1rpc.io/matic'
+     // }
     },
     tokens: {
       matic: {
@@ -242,18 +266,18 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     ovmGasPriceOracleContract: '0x420000000000000000000000000000000000000F',
     rpcUrls: {
-      blockPi: {
-        name: 'BlockPi',
-        url: 'https://optimism.blockpi.network/v1/rpc/public'
-      },
-      oneRpc: {
-        name: '1RPC',
-        url: 'https://1rpc.io/op'
-      },
-      Optimism: {
-        name: 'Optimism',
-        url: 'https://mainnet.optimism.io'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
+//      chainnodes: {
+//        name: 'Tornado RPC',
+//        url: 'https://optimism-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+//      },
+//      oneRpc: {
+//        name: '1RPC',
+//        url: 'https://1rpc.io/op'
+//      }
     },
     tokens: {
       eth: {
@@ -297,14 +321,22 @@ export default {
     multicall: '0x842eC2c7D803033Edf55E478F461FC547Bc54EB2',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      blockPi: {
-        name: 'BlockPi',
-        url: 'https://arbitrum.blockpi.network/v1/rpc/public'
-      },
-      Arbitrum: {
-        name: 'Arbitrum RPC',
-        url: 'https://arb1.arbitrum.io/rpc'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
+//      chainnodes: {
+//        name: 'Tornado RPC',
+//        url: 'https://arbitrum-one.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+//      },
+//      oneRpc: {
+//        name: '1rpc',
+//        url: 'https://1rpc.io/arb'
+//      },
+//      Arbitrum: {
+//        name: 'Arbitrum RPC',
+//        url: 'https://arb1.arbitrum.io/rpc'
+//      }
     },
     tokens: {
       eth: {
@@ -348,14 +380,18 @@ export default {
     multicall: '0xb5b692a88bdfc81ca69dcb1d924f59f0413a602a',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      communityResolver: {
-        name: 'Community RPC Resolver',
-        url: 'https://development.tornadocash.community/rpc/v1'
-      },
-      blockPi: {
-        name: 'BlockPi',
-        url: 'https://gnosis.blockpi.network/v1/rpc/public'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://gnosis-mainnet.g.alchemy.com/v2/${ALCHEMY_GNOSIS_KEY}`
       }
+//      chainnodes: {
+//        name: 'Tornado RPC',
+//        url: 'https://gnosis-mainnet.chainnodes.org/d692ae63-0a7e-43e0-9da9-fe4f4cc6c607'
+//      },
+//      blockPi: {
+//        name: 'BlockPi',
+//        url: 'https://gnosis.blockpi.network/v1/rpc/public'
+//      }
     },
     tokens: {
       xdai: {
@@ -399,22 +435,23 @@ export default {
     multicall: '0xe86e3989c74293Acc962156cd3F525c07b6a1B6e',
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
-      publicRpc1: {
-        name: 'Avalanche RPC',
-        url: 'https://api.avax.network/ext/bc/C/rpc'
-      },
-      blockPi: {
-        name: 'BlockPi',
-        url: 'https://avalanche.blockpi.network/v1/rpc/public'
-      },
-      publicRpc2: {
-        name: 'Avalanche Public PRC',
-        url: 'https://avalanche-evm.publicnode.com'
-      },
-      oneRpc: {
-        name: '1RPC',
-        ulr: 'https://1rpc.io/avax/'
+      alchemy: {
+        name: 'Alchemy RPC',
+        url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_AVAX_KEY}`
+        //url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
+//      publicRpc: {
+//        name: 'Avalanche RPC',
+//        url: 'https://api.avax.network/ext/bc/C/rpc'
+//      },
+//      meowRPC: {
+//        name: 'Meow RPC',
+//        url: 'https://avax.meowrpc.com'
+//      },
+//      oneRPC: {
+//        name: 'OneRPC',
+//        url: 'https://1rpc.io/avax/c'
+//      }
     },
     tokens: {
       avax: {
