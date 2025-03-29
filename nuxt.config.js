@@ -180,7 +180,9 @@ export default {
       '@nuxtjs/moment',
       {
         defaultLocale: 'en',
-        locales: ['ru', 'zh-cn', 'fr', 'es', 'tr', 'uk']
+        // get rid of locales for now
+        //locales: ['ru', 'zh-cn', 'fr', 'es', 'tr', 'uk']
+        locales: []
       }
     ]
   ],
@@ -194,8 +196,9 @@ export default {
     ALCHEMY_POLYGON_KEY: process.env.ALCHEMY_POLYGON_KEY
   },
 
+  // fix to alchemy
   provider: {
-    rpcUrl: `https://mainnet.chainnodes.org/${process.env.CHAINNODES_KEY}`
+    rpcUrl: `https://eth-mainnet.alchemyapi.io/v2/${process.env.ALCHEMY_MAINNET_KEY}`
   },
 
   loadingIndicator: {
