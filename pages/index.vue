@@ -47,42 +47,6 @@
       </i18n>
     </b-notification>
 
-    <b-notification
-      :active="isActiveNotification.second"
-      class="main-notification"
-      type="is-warning"
-      icon-pack="icon"
-      has-icon
-      :aria-close-label="$t('closeNotification')"
-      @close="disableNotification({ key: 'second' })"
-    >
-      <i18n path="rpcDisclaimer">
-        <template v-slot:linkOne>
-          <a
-            href="https://home.treasury.gov/news/press-releases/jy0916"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ $t('rpcDisclaimerLinkOneText') }}
-          </a>
-        </template>
-        <template v-slot:linkTwo>
-          <a href="https://chainlist.org" target="_blank" rel="noopener noreferrer">
-            {{ $t('rpcDisclaimerLinkTwoText') }}
-          </a>
-        </template>
-        <template v-slot:linkThree>
-          <a
-            href="https://docs.tornado.ws/general/guides/post-censorship#RPC"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {{ $t('rpcDisclaimerLinkThreeText') }}
-          </a>
-        </template>
-      </i18n>
-    </b-notification>
-
     <div class="columns">
       <div class="column is-half">
         <b-tabs v-model="activeTab" class="is-tornado" :animated="false" @input="tabChanged">
@@ -126,7 +90,7 @@ export default {
   watch: {
     netId() {
       if (this.activeTab === 1) {
-        this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
+        // this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
       }
     }
   },
@@ -147,7 +111,7 @@ export default {
     },
     async tabChanged(tabIndex) {
       if (tabIndex === 1) {
-        this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
+        // this.$store.dispatch('relayer/pickRandomRelayer', { type: 'tornado' })
 
         if (typeof this.getKeys === 'function' && !this.isActive) {
           this.isActive = true
