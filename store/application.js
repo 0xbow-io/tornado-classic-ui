@@ -435,7 +435,8 @@ const actions = {
       const currentBlockNumber = await web3.eth.getBlockNumber()
 
       let events = []
-
+      
+      // TODO: get rid of broken thegraph calls
       const { events: graphEvents, lastSyncBlock } = await graph.getAllEncryptedNotes({
         netId,
         fromBlock: deployedBlock
@@ -670,8 +671,10 @@ const actions = {
     console.log('pathElements, pathIndices', pathElements, pathIndices)
 
     const nativeCurrency = rootGetters['metamask/nativeCurrency']
-    const withdrawType = state.withdrawType
 
+    // NOTE: this is for v0 only. Forcing no relayer, self-withdraw.
+    //const withdrawType = state.withdrawType
+    const withdrawType = 'wallet'; 
     let relayer = BigInt(0)
     let fee = BigInt(0)
     let refund = BigInt(0)
@@ -693,6 +696,7 @@ const actions = {
       }
 
       const { circuit, provingKey } = await getTornadoKeys()
+//      console.log("TORNADO ARTIFACTS", circuit, provingKey);
 
       if (!groth16) {
         groth16 = await buildGroth16()
@@ -750,6 +754,12 @@ const actions = {
       if (isSpent) {
         throw new Error(this.app.i18n.t('noteHasBeenSpent'))
       }
+//      console.log("PREPARE BEFORE SNARK PROOF",
+//        root,
+//        tree,
+//        recipient,
+//        parsedNote,
+//        tree.indexOf(parsedNote.commitmentHex));
 
       const { proof, args } = await dispatch('createSnarkProof', {
         root,

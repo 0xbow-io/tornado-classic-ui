@@ -170,6 +170,7 @@ export default {
     return {
       withdrawAddress: '0x6E7742A2cB628d02a32986F906715Bb65bC72E7E',
       withdrawNote: '',
+      withdrawType: 'wallet',
       depositsPast: null,
       depositTxHash: null,
       depositTimestamp: null,
