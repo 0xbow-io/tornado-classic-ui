@@ -30,7 +30,7 @@ export default {
     deployedBlock: 9116966,
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://eth-mainnet.alchemyapi.io/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      ,
@@ -152,7 +152,7 @@ export default {
     
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      chainnodes: {
@@ -207,7 +207,7 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_POLYGON_KEY}`
       }
       //,
@@ -260,7 +260,7 @@ export default {
     ovmGasPriceOracleContract: '0x420000000000000000000000000000000000000F',
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      chainnodes: {
@@ -315,7 +315,7 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      chainnodes: {
@@ -374,7 +374,7 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
       alchemy: {
-        name: 'Tornado RPC',
+        name: 'Alchemy RPC',
         url: `https://gnosis-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      chainnodes: {
