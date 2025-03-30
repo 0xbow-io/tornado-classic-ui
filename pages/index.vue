@@ -47,8 +47,8 @@
       </i18n>
     </b-notification>
 
-    <div class="columns">
-      <div class="column is-half">
+    <div class="columns is-centered">
+      <div class="column is-half-desktop is-three-quarters-tablet is-full-mobile">
         <b-tabs v-model="activeTab" class="is-tornado" :animated="false" @input="tabChanged">
           <Deposit />
           <Withdraw :active-tab="activeTab" @get-key="onGetKey" />
