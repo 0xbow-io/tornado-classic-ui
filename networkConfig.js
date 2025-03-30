@@ -429,7 +429,7 @@ export default {
     echoContractAccount: '0xa75BF2815618872f155b7C4B0C81bF990f5245E4',
     rpcUrls: {
       alchemy: {
-        name: 'Avalanche RPC',
+        name: 'Alchemy RPC',
         url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      publicRpc: {
