@@ -54,7 +54,7 @@
           <Withdraw :active-tab="activeTab" @get-key="onGetKey" />
         </b-tabs>
       </div>
-      <Statistics />
+      <!--  <Statistics />  -->
     </div>
     <Txs />
   </div>
