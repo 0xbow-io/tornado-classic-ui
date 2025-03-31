@@ -26,6 +26,8 @@
           <div class="level-item is-column">
             <div class="level-subitem">
               <div class="buttons">
+                
+<!-- kill old dune
                 <b-button
                   tag="a"
                   type="is-icon"
@@ -34,18 +36,19 @@
                   rel="noopener noreferrer"
                   icon-right="stats"
                 ></b-button>
+-->
                 <b-button
                   tag="a"
                   type="is-icon"
-                  href="https://git.tornado.ws/tornadocash/classic-ui"
+                  href="https://x.com/0xbowio"
                   target="_blank"
                   rel="noopener noreferrer"
-                  icon-right="git"
+                  icon-right="twitter"
                 ></b-button>
                 <b-button
                   tag="a"
                   type="is-icon"
-                  href="https://github.com/tornadocash"
+                  href="https://github.com/0xbow-io"
                   target="_blank"
                   rel="noopener noreferrer"
                   icon-right="github"
