@@ -3,7 +3,10 @@ const {
   ALCHEMY_GOERLI_KEY,
   ALCHEMY_OPTIMISM_KEY,
   ALCHEMY_ARBITRUM_KEY,
-  ALCHEMY_POLYGON_KEY
+  ALCHEMY_POLYGON_KEY,
+  ALCHEMY_BSC_KEY,
+  ALCHEMY_AVAX_KEY,
+  ALCHEMY_GNOSIS_KEY
 } = process.env
 
 export const blockSyncInterval = 10000
@@ -153,7 +156,7 @@ export default {
     rpcUrls: {
       alchemy: {
         name: 'Alchemy RPC',
-        url: `https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
+        url: `https://bnb-mainnet.g.alchemy.com/v2/${ALCHEMY_BSC_KEY}`
       }
 //      chainnodes: {
 //        name: 'Tornado RPC',
@@ -375,7 +378,7 @@ export default {
     rpcUrls: {
       alchemy: {
         name: 'Alchemy RPC',
-        url: `https://gnosis-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
+        url: `https://gnosis-mainnet.g.alchemy.com/v2/${ALCHEMY_GNOSIS_KEY}`
       }
 //      chainnodes: {
 //        name: 'Tornado RPC',
@@ -430,7 +433,8 @@ export default {
     rpcUrls: {
       alchemy: {
         name: 'Alchemy RPC',
-        url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
+        url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_AVAX_KEY}`
+        //url: `https://avax-mainnet.g.alchemy.com/v2/${ALCHEMY_MAINNET_KEY}`
       }
 //      publicRpc: {
 //        name: 'Avalanche RPC',

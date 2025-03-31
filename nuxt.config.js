@@ -153,8 +153,11 @@ export default {
           ALCHEMY_MAINNET_KEY: process.env.ALCHEMY_MAINNET_KEY,
           ALCHEMY_GOERLI_KEY: process.env.ALCHEMY_GOERLI_KEY,
           ALCHEMY_OPTIMISM_KEY: process.env.ALCHEMY_OPTIMISM_KEY,
+          ALCHEMY_POLYGON_KEY: process.env.ALCHEMY_POLYGON_KEY,
           ALCHEMY_ARBITRUM_KEY: process.env.ALCHEMY_ARBITRUM_KEY,
-          ALCHEMY_POLYGON_KEY: process.env.ALCHEMY_POLYGON_KEY
+          ALCHEMY_BSC_KEY: process.env.ALCHEMY_BSC_KEY,
+          ALCHEMY_AVAX_KEY: process.env.ALCHEMY_AVAX_KEY,
+          ALCHEMY_GNOSIS_KEY: process.env.ALCHEMY_GNOSIS_KEY,
         })
       })
     ],
