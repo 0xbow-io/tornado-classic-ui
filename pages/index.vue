@@ -1,5 +1,9 @@
 <template>
   <div>
+   
+    <!-- 
+// get rid of binance specific notice
+
     <b-notification
       v-if="netId === 56"
       :active="isActiveNotification.binanceInternal"
@@ -12,6 +16,8 @@
     >
       <i18n path="binanceInternalTxsNotification" />
     </b-notification>
+
+  -->
 
     <b-notification
       :active="isActiveNotification.third"
