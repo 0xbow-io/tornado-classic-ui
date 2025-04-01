@@ -730,6 +730,7 @@ const actions = {
       console.log('Start generating SNARK proof', input)
       console.time('SNARK proof time')
       const proofData = await websnarkUtils.genWitnessAndProve(groth16, input, circuit, provingKey)
+
       const { proof } = websnarkUtils.toSolidityInput(proofData)
 
       const args = [
